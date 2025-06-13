@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Helly AJ - Log Masuk</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #004B97, #D10024); /* Johor flag-inspired gradient */
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .header-title img {
+      width: 80px;
+      margin-bottom: 15px;
+    }
+
+    .header-title h1 {
+      font-size: 2.5em;
+      color: #ffffff;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .header-title p {
+      font-style: italic;
+      font-size: 1.1em;
+      color: #f0f0f0;
+      margin-bottom: 30px;
+    }
+
+    .login-container {
+      position: relative;
+      background-color: #ffffff;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 340px;
+      animation: bounceIn 0.8s ease;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      z-index: -1;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #D10024, #004B97);
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h2 {
+      color: #004B97;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #ced4da;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: #D10024;
+      outline: none;
+      box-shadow: 0 0 6px #D10024AA;
+    }
+
+    button {
+      background: linear-gradient(to right, #D10024, #004B97);
+      color: white;
+      padding: 12px;
+      margin-top: 15px;
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: linear-gradient(to right, #b3001d, #00356a);
+    }
+
+    .register-link {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #D10024;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .admin-button-container {
+      margin-top: 25px;
+    }
+
+    .admin-button {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s ease;
+    }
+
+    .admin-button:hover {
+      background-color: #5a6268;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="header-title">
+      <!-- Optional logo: <img src="logo.png" alt="Logo Helly AJ" /> -->
+      <h1>Homestay Helly AJ</h1>
+      <p>Keselesaan Anda Keutamaan Kami</p>
+    </div>
+
+    <div class="login-container">
+      <h2>👤 Log Masuk Tetamu</h2>
+      <form action="/login" method="post">
+        <input type="text" id="username" name="username" placeholder="Nama Pengguna" required />
+        <input type="password" id="password" name="password" placeholder="Kata Laluan" required />
+        <button type="submit">Log Masuk</button>
+      </form>
+      <div class="register-link">
+        <p>Belum ada akaun? <a href="/daftar-tetamu">Daftar di sini</a></p>
+      </div>
+    </div>
+
+    <div class="admin-button-container">
+      <button class="admin-button" onclick="location.href='/login-admin'">Log Masuk Admin</button>
+    </div>
+  </div>
+</body>
+</html>

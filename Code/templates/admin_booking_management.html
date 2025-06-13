@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengurusan Tempahan</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .management-container { background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); max-width: 1100px; margin: 30px auto; }
+        h2 { text-align: center; color: #343a40; margin-bottom: 30px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 15px; }
+        th { background-color: #007bff; color: white; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #e9ecef; }
+        .action-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 8px;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        .action-btn.reject { background-color: #dc3545; }
+        .action-btn.edit { background-color: #007bff; }
+        .action-btn:hover { opacity: 0.9; }
+        .status-pending { color: #ffc107; font-weight: bold; }
+        .status-disahkan { color: #28a745; font-weight: bold; }
+        .status-dibatalkan { color: #dc3545; font-weight: bold; }
+        .back-button { margin-top: 30px; text-align: center; font-size: 15px; }
+        .back-button a { color: #007bff; text-decoration: none; font-weight: 600; }
+        .back-button a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="management-container">
+        <h2>Pengurusan Tempahan Tetamu</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Tempahan</th>
+                    <th>Nama Tetamu</th>
+                    <th>Tarikh Masuk</th>
+                    <th>Tarikh Keluar</th>
+                    <th>Bil. Tetamu</th>
+                    <th>Kenderaan</th>
+                    <th>No. Plat Kenderaan</th>
+                    <th>Status</th>
+                    <th>Tindakan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>B001</td>
+                    <td>Ali Bin Abu</td>
+                    <td>2025-07-01</td>
+                    <td>2025-07-05</td>
+                    <td>4</td>
+                    <td>Kereta</td>
+                    <td>WXD1234</td>
+                    <td class="status-disahkan">Disahkan</td>
+                    <td>
+                        <button class="action-btn edit">Kemaskini</button>
+                        <button class="action-btn reject">Batalkan</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>B002</td>
+                    <td>Siti Nurhaliza</td>
+                    <td>2025-08-10</td>
+                    <td>2025-08-12</td>
+                    <td>2</td>
+                    <td>Tiada</td>
+                    <td>-</td>
+                    <td class="status-pending">Menunggu Pengesahan</td>
+                    <td>
+                        <button class="action-btn">Sahkan</button>
+                        <button class="action-btn edit">Kemaskini</button>
+                        <button class="action-btn reject">Batalkan</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="back-button">
+            <p><a href="/dashboard-admin">Kembali ke Dashboard Admin</a></p>
+        </div>
+    </div>
+</body>
+</html>

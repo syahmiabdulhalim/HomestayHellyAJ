@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sejarah Tempahan Saya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #001f3f, #d7263d);
+      animation: fadeIn 1s ease-in;
+    }
+
+    .history-container {
+      background-color: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      width: 95%;
+      max-width: 1000px;
+      animation: slideUp 0.8s ease;
+    }
+
+    h2 {
+      text-align: center;
+      color: #001f3f;
+      font-weight: 600;
+      font-size: 30px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #d7263d;
+      color: white;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f5f8fa;
+    }
+
+    tr:hover {
+      background-color: #edf1f7;
+      transition: background-color 0.3s ease;
+    }
+
+    .status-disahkan {
+      color: #198754;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      color: #fd7e14;
+      font-weight: bold;
+    }
+
+    .status-dibatalkan {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .back-button {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .back-button a {
+      background-color: #001f3f;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button a:hover {
+      background-color: #021428;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .history-container {
+        padding: 25px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      th, td {
+        font-size: 14px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="history-container">
+    <h2>Sejarah Tempahan Saya</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID Tempahan</th>
+          <th>Tarikh Masuk</th>
+          <th>Tarikh Keluar</th>
+          <th>Bil. Tetamu</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>T001</td>
+          <td>2025-07-01</td>
+          <td>2025-07-05</td>
+          <td>4</td>
+          <td class="status-disahkan">Disahkan</td>
+        </tr>
+        <tr>
+          <td>T002</td>
+          <td>2025-08-10</td>
+          <td>2025-08-12</td>
+          <td>2</td>
+          <td class="status-pending">Menunggu</td>
+        </tr>
+        <tr>
+          <td>T003</td>
+          <td>2025-06-01</td>
+          <td>2025-06-03</td>
+          <td>3</td>
+          <td class="status-dibatalkan">Dibatalkan</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="back-button">
+      <p><a href="/dashboard-tetamu">← Kembali ke Dashboard</a></p>
+    </div>
+  </div>
+</body>
+</html>
