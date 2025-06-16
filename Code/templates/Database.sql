@@ -1,0 +1,45 @@
+CREATE TABLE GUEST (
+    GuestID NUMBER(10) PRIMARY KEY,
+    FullName VARCHAR2(100),
+    PhoneNo NUMBER(12)
+);
+
+CREATE TABLE ADMIN (
+    AdminID NUMBER(10) PRIMARY KEY,
+    Username VARCHAR2(20),
+    APassword VARCHAR2(30)
+);
+
+CREATE TABLE VEHICLE (
+    VehicleID NUMBER(10) PRIMARY KEY,
+    GuestID NUMBER(10),
+    CONSTRAINT GuestID FOREIGN KEY(GuestID) REFERENCES GUEST(GuestID),
+    PlateNumber VARCHAR2(10)
+);
+
+CREATE TABLE BOOKING (
+    BookingID NUMBER(10) PRIMARY KEY,
+    GuestID NUMBER(10),
+    AdminID NUMBER(10),
+    CONSTRAINT GuestID_FK FOREIGN KEY(GuestID) REFERENCES GUEST(GuestID),
+    CONSTRAINT AdminID_FK FOREIGN KEY(AdminID) REFERENCES ADMIN(AdminID),
+    CheckInDate DATE,
+    CheckOutDate DATE,
+    NumOfGuest NUMBER(5), 
+    ExtraHours NUMBER(5), 
+    TotalPrice NUMBER(38), 
+    PurposeOfStay VARCHAR2(100),
+    Status VARCHAR2(15)
+);
+
+CREATE TABLE BILL (
+    BillID NUMBER(10) PRIMARY KEY,
+    BookingID NUMBER(10),
+    CONSTRAINT BookingID FOREIGN KEY(BookingID) REFERENCES BOOKING(BookingID),
+    IssueDate DATE,
+    TotalAmount NUMBER(38),
+    PaymentMethod VARCHAR2(100),
+    PaymentStatus VARCHAR2(15),
+    UtilityCharges NUMBER(38),
+    ExtraHours NUMBER(5)
+);
