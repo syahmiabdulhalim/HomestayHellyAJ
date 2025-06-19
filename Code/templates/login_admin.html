@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Log Masuk Admin - Homestay Helly AJ</title>
+  <link rel="icon" href="image/logo2.png" type="image/png"> 
   <style>
     body {
       margin: 0;
@@ -24,6 +25,14 @@
       width: 360px;
       text-align: center;
       animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .login-container img { 
+      width: 90px;
+      margin-bottom: 25px; /* Increased margin for better spacing */
+      display: block; /* Ensures margin: auto works for centering */
+      margin-left: auto;
+      margin-right: auto;
     }
 
     @keyframes fadeIn {
@@ -122,6 +131,7 @@
 </head>
 <body>
   <div class="login-container">
+    <img src="image/logo2.png" alt="Logo Helly AJ" /> 
     <h2>Log Masuk Admin</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -141,7 +151,7 @@
     </form>
 
     <div class="back-link">
-      <p><a href="/">⟵ Kembali ke Log Masuk Tetamu</a></p>
+      <p><a href="../templates/index.html">⟵ Kembali ke Log Masuk Tetamu</a></p>
     </div>
   </div>
 </body>

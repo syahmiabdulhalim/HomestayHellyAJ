@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard Tetamu - Homestay Helly AJ</title>
+  <link rel="icon" href="image/logo2.png" type="image/png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
 
@@ -27,6 +28,14 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
+    .header img {
+      width: 70px;
+      position: absolute; 
+      top: 50%; 
+      left: 20px; /* Position it 20px from the left edge */
+      transform: translateY(-50%);
+    }
+
     .header h1 {
       margin: 0;
       font-weight: 700;
@@ -35,7 +44,7 @@
 
     .logout-button {
       position: absolute;
-      top: 20px;
+      top: 30px;
       right: 20px;
       background-color: #dc3545;
       color: white;
@@ -127,14 +136,15 @@
 </head>
 <body>
   <div class="header">
+    <img src="image/logo2.png" alt="Logo Helly AJ" /> 
     <h1>Selamat Datang, [Nama Tetamu]!</h1>
     <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
   </div>
 
   <div class="nav">
-    <a href="/tempahan-tetamu">Buat Tempahan</a>
-    <a href="/sejarah-tempahan-tetamu">Sejarah Tempahan</a>
-    <a href="/profil-tetamu">Profil Saya</a>
+    <a href="../templates/guest_booking.html">Buat Tempahan</a>
+    <a href="../templates/guest_booking_history.html">Sejarah Tempahan</a>
+    <a href="../templates/guest_profile.html">Profil Saya</a>
   </div>
 
   <div class="container">

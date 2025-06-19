@@ -136,7 +136,7 @@ def logout():
     return redirect(url_for('index'))
 
 # --- Laluan Tetamu ---
-@app.route('/daftar-tetamu', methods=['GET', 'POST'])
+@app.route('/guest_registration', methods=['GET', 'POST'])
 def guest_registration():
     if request.method == 'POST':
         fullname = request.form['fullname']

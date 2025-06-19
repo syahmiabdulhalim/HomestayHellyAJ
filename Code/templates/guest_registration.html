@@ -4,10 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Tetamu Baharu</title>
+    <link rel="icon" href="image/logo2.png" type="image/png"> 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .register-container { background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); width: 450px; max-width: 100%; }
-        h2 { text-align: center; color: #343a40; margin-bottom: 30px; font-weight: 600; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #004B97, #D10024);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; 
+        }
+
+        .register-container { 
+            background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            animation: bounceIn 0.8s ease;
+            width: 450px; max-width: 100%; }
+        
+        h2 { text-align: center; color: #004B97; margin-bottom: 30px; font-weight: 600; }
+        
         label { display: block; margin-bottom: 8px; color: #495057; font-weight: 500; }
         input[type="text"], input[type="email"], input[type="password"] {
             width: calc(100% - 24px); /* Account for padding */
@@ -19,7 +33,7 @@
             box-sizing: border-box;
         }
         button {
-            background-color: #007bff; /* Primary Blue */
+            background: linear-gradient(to right, #D10024, #004B97);
             color: white;
             padding: 12px 20px;
             border: none;
@@ -31,9 +45,11 @@
             margin-top: 10px;
             transition: background-color 0.3s ease;
         }
-        button:hover { background-color: #0056b3; }
+        button:hover { transform: scale(1.03);
+            background: linear-gradient(to right, #b3001d, #00356a); }
+
         .back-link { text-align: center; margin-top: 30px; font-size: 15px; }
-        .back-link a { color: #007bff; text-decoration: none; font-weight: 600; }
+        .back-link a { color: #D10024; text-decoration: none; font-weight: 600; }
         .back-link a:hover { text-decoration: underline; }
     </style>
 </head>
@@ -59,7 +75,7 @@
             <button type="submit">Daftar</button>
         </form>
         <div class="back-link">
-            <p><a href="/">Kembali ke Log Masuk</a></p>
+            <p><a href="../templates/index.html">Kembali ke Log Masuk</a></p>
         </div>
     </div>
 </body>
