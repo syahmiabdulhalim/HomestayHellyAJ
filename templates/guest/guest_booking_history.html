@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sejarah Tempahan Saya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #001f3f, #d7263d);
+      animation: fadeIn 1s ease-in;
+    }
+
+    .history-container {
+      background-color: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      width: 95%;
+      max-width: 1000px;
+      animation: slideUp 0.8s ease;
+    }
+
+    h2 {
+      text-align: center;
+      color: #001f3f;
+      font-weight: 600;
+      font-size: 30px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #d7263d;
+      color: white;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f5f8fa;
+    }
+
+    tr:hover {
+      background-color: #edf1f7;
+      transition: background-color 0.3s ease;
+    }
+
+    .status-disahkan {
+      color: #198754;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      color: #fd7e14;
+      font-weight: bold;
+    }
+
+    .status-dibatalkan {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .back-button {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .back-button a {
+      background-color: #001f3f;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button a:hover {
+      background-color: #021428;
+    }
+
+    .status-menunggu-pengesahan { color: #ffc107; font-weight: bold; }
+.status-disahkan { color: #198754; font-weight: bold; }
+.status-dibatalkan { color: #dc3545; font-weight: bold; }
+    .status-selesai { color: #0d6efd; font-weight: bold; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .history-container {
+        padding: 25px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      th, td {
+        font-size: 14px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="history-container">
+    <h2>Sejarah Tempahan Saya</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID Tempahan</th>
+          <th>Tarikh Masuk</th>
+          <th>Tarikh Keluar</th>
+          <th>Bil. Tetamu</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bookings in bookings %}
+        <tr>
+          <td>{{ bookings.booking_id }}</td>
+          <!-- <td>{{ booking.check_in.strftime('%Y-%m-%d') }}</td>
+          <td>{{ booking.check_out.strftime('%Y-%m-%d') }}</td> -->
+          <td>{{ bookings.check_in }}</td>
+          <td>{{ bookings.check_out }}</td>
+
+          <td>{{ bookings.num_guests }}</td>
+          <td class="
+            {% if booking.status.lower() == 'disahkan' %}
+              status-disahkan
+            {% elif booking.status.lower() == 'dibatalkan' %}
+              status-dibatalkan
+            {% else %}
+              status-pending
+            {% endif %}
+          ">
+            <td class="
+  status-{{ booking.status.lower().replace(' ', '-') }}
+">
+  {{ bookings.status }}
+</td>
+
+
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" style="text-align: center; font-style: italic;">Tiada rekod tempahan ditemui.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="back-button">
+      <p><a href="/guest/guest_home">← Kembali ke Dashboard</a></p>
+    </div>
+  </div>
+</body>
+</html>

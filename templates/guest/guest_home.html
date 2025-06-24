@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Tetamu - Homestay Helly AJ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background: linear-gradient(to right, #004B97, #D10024);
+      color: white;
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 2em;
+    }
+
+    .logout-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #dc3545;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout-button:hover {
+      background-color: #b02a37;
+    }
+
+    .nav {
+      background-color: #ffffff;
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .nav a {
+      margin: 0 20px;
+      text-decoration: none;
+      color: #343a40;
+      font-weight: 600;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .nav a:hover {
+      color: #004B97;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 20px;
+    }
+
+    .dashboard-card {
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+      transform: scale(1.02);
+    }
+
+    h3 {
+      color: #004B97;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .logout-button {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Selamat Datang, {{ username }} !</h1>
+    <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
+  </div>
+
+  <div class="nav">
+    <a href="/guest/guest_booking">Buat Tempahan</a>
+    <a href="/guest/guest_booking_history">Sejarah Tempahan</a>
+    <a href="/guest/guest_profile">Profil Saya</a>
+  </div>
+
+  <div class="container">
+    <div class="dashboard-grid">
+      <!-- Column 1 Row 1 -->
+      <div class="dashboard-card">
+        <h3>Status Tempahan Terkini</h3>
+        <ul>
+          <li>Tempahan #1234 - Disahkan ✅</li>
+          <li>Tempahan #1233 - Dibatalkan ❌</li>
+        </ul>
+      </div>
+
+      <!-- Column 2 Row 1 -->
+      <div class="dashboard-card">
+        <h3>Kemudahan Disediakan</h3>
+        <ul>
+          <li>📶 WiFi Percuma</li>
+          <li>❄️ Aircond</li>
+          <li>🚗 Parkir Percuma</li>
+          <li>📺 Smart TV & Netflix</li>
+          <li>🍽️ Dapur Mini & Peralatan Masak</li>
+        </ul>
+      </div>
+
+      <!-- Column 1 Row 2 -->
+      <div class="dashboard-card">
+        <h3>Larangan Semasa Menginap</h3>
+        <ul>
+          <li>🚭 Dilarang merokok di dalam rumah</li>
+          <li>🐶 Tidak dibenarkan membawa haiwan peliharaan</li>
+          <li>🍺 Alkohol tidak dibenarkan</li>
+          <li>🎉 Parti atau bunyi bising selepas 10 malam adalah dilarang</li>
+        </ul>
+      </div>
+
+      <!-- Column 2 Row 2 -->
+      <div class="dashboard-card">
+        <h3>Tarikan Berdekatan (Pasir Gudang)</h3>
+        <ul>
+          <li>🌊 Tanjung Puteri Resort (10 minit)</li>
+          <li>🛍️ AEON Permas Jaya (15 minit)</li>
+          <li>🏞️ Hutan Bandar Pasir Gudang (5 minit)</li>
+          <li>⚓ Muzium Layang-Layang Pasir Gudang</li>
+          <li>🍜 Medan Selera Taman Cendana</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

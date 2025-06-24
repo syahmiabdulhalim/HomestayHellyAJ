@@ -160,16 +160,37 @@ def guest_registration():
             return render_template('guest_registration.html', fullname=fullname, email=email, phone=phone, username=username)
     return render_template('guest_registration.html')
 
-@app.route('/dashboard-tetamu')
-def guest_home():
-    if 'logged_in' in session and session['role'] == 'guest':
-        username = session['username']
-        guest_info = users_db["guest_users"].get(username, {})
-        user_bookings = [b for b in bookings_db if b['guest_username'] == username]
-        latest_booking_status = user_bookings[-1]['status'] if user_bookings else "Tiada tempahan aktif."
-        return render_template('guest_home.html', guest_info=guest_info, latest_booking_status=latest_booking_status)
-    flash("Sila log masuk sebagai tetamu untuk mengakses halaman ini.", "warning")
+@app.route('/admin/admin_dashboard')
+def admin_dashboard():
+    if 'logged_in' in session and session['role'] == 'admin':
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # Dapatkan data dari DB
+            cur.execute("SELECT COUNT(*) FROM Guest")
+            num_guests = cur.fetchone()[0]
+
+            cur.execute("SELECT COUNT(*) FROM Booking WHERE Status = 'Menunggu Pengesahan'")
+            num_pending_bookings = cur.fetchone()[0]
+
+            cur.execute("SELECT COUNT(*) FROM Bill WHERE Status = 'Belum Dibayar'")
+            num_unpaid_bills = cur.fetchone()[0]
+
+            cur.close()
+            conn.close()
+
+            return render_template('admin_dashboard.html',
+                                   num_guests=num_guests,
+                                   num_pending_bookings=num_pending_bookings,
+                                   num_unpaid_bills=num_unpaid_bills)
+        except Exception as e:
+            print("Dashboard Error:", e)
+            flash("Ralat semasa ambil data dari pangkalan data.", "danger")
+            return redirect(url_for('index'))
+    flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
+
 
 @app.route('/tempahan-tetamu', methods=['GET', 'POST'])
 def guest_booking():
@@ -199,14 +220,71 @@ def guest_booking():
     flash("Sila log masuk sebagai tetamu untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
 
-@app.route('/sejarah-tempahan-tetamu')
+from datetime import timedelta
+
+@app.route('/guest/guest_booking_history')
 def guest_booking_history():
+    print("DEBUG: Session inside /guest/guest_booking_history →", session)
+
     if 'logged_in' in session and session['role'] == 'guest':
         username = session['username']
-        user_bookings = [b for b in bookings_db if b['guest_username'] == username]
-        return render_template('guest_booking_history.html', bookings=user_bookings)
+
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # STEP 1: Dapatkan GUESTID berdasarkan USERNAME
+            cur.execute("SELECT GUESTID FROM GUEST WHERE USERNAME = :1", (username,))
+            result = cur.fetchone()
+
+            if not result:
+                flash("Gagal mencari ID tetamu.", "danger")
+                return redirect(url_for('index'))
+
+            guest_id = result[0]
+            print("DEBUG GUESTID:", guest_id)
+
+            # STEP 2: Dapatkan tempahan dari table BOOKINGS
+            cur.execute("""
+                SELECT ID, CHECKINDATE, NIGHTS, STATUS
+                FROM BOOKINGS
+                WHERE GUESTID = :1
+                ORDER BY CHECKINDATE DESC
+            """, (guest_id,))
+
+            bookings = []
+            for row in cur.fetchall():
+                check_in = row[1]
+                nights = row[2] or 1  # fallback kalau NULL
+                check_out = check_in + timedelta(days=nights)
+                status = row[3] if row[3] else "Tiada Status"
+
+                bookings.append({
+                    "booking_id": row[0],
+                    "check_in": check_in,
+                    "check_out": check_out,
+                    "num_guests": "-",  # sebab table BOOKINGS tiada field ni
+                    "status": status
+                })
+
+            return render_template('guest/guest_booking_history.html', bookings=bookings)
+
+        except Exception as e:
+            import traceback
+            print("ERROR DITEMUI:")
+            traceback.print_exc()
+            flash("Ralat mendapatkan sejarah tempahan. Sila semak terminal untuk butiran.", "danger")
+            return redirect(url_for('index'))
+
+        finally:
+            cur.close()
+            conn.close()
+
     flash("Sila log masuk sebagai tetamu untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
+
+
+
 
 @app.route('/profil-tetamu', methods=['GET', 'POST'])
 def guest_profile():
@@ -250,22 +328,43 @@ def admin_dashboard():
         num_pending_bookings = len(pending_bookings)
         unpaid_bills = [b for b in bills_db if b['status'] == 'Belum Dibayar']
         num_unpaid_bills = len(unpaid_bills)
-        return render_template('admin_dashboard.html',
+        return render_template('/admin/admin_dashboard.html',
                                num_guests=num_guests,
                                num_pending_bookings=num_pending_bookings,
                                num_unpaid_bills=num_unpaid_bills)
     flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
 
-@app.route('/urus-tetamu')
+@app.route('/admin/admin_guest_management')
 def admin_guest_management():
+    
     if 'logged_in' in session and session['role'] == 'admin':
-        all_guests = users_db["guest_users"].items()
-        return render_template('admin_guest_management.html', guests=all_guests)
-    flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT GUESTID, FULLNAME, EMAIL, PHONE, USERNAME
+                FROM GUEST
+                ORDER BY GUESTID
+            """)
+            guests = cur.fetchall()  # [(1, 'Ali', 'ali@email.com', ...), ...]
+
+            cur.close()
+            conn.close()
+
+            return render_template('admin_guest_management.html', guests=guests)
+
+        except Exception as e:
+            flash("Ralat ketika akses data tetamu: " + str(e), "danger")
+            return redirect(url_for('admin_dashboard'))
+
+    flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
 
-@app.route('/urus-admin')
+
+
+@app.route('/admin/admin_admin_management')
 def admin_admin_management():
     if 'logged_in' in session and session['role'] == 'admin':
         all_admins = users_db["admin_users"].items()
@@ -273,7 +372,7 @@ def admin_admin_management():
     flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
 
-@app.route('/urus-tempahan')
+@app.route('/admin/admin_booking_management')
 def admin_booking_management():
     if 'logged_in' in session and session['role'] == 'admin':
         bookings_with_guest_names = []
@@ -311,7 +410,7 @@ def cancel_booking(booking_id):
     flash("Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.", "danger")
     return redirect(url_for('index'))
 
-@app.route('/urus-bil')
+@app.route('/admin/admin_bill_management')
 def admin_bill_management():
     if 'logged_in' in session and session['role'] == 'admin':
         bills_with_guest_names = []

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - Homestay Helly AJ</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e1ecf7, #fef6ff); /* Soft gradient ala Johor */
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background-color: #6a11cb; /* Purple biru-ish Johor */
+      background-image: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 25px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .logout-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #ff4d6d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout-button:hover {
+      background-color: #e60039;
+    }
+
+    .nav {
+      background-color: #ffffff;
+      padding: 15px 0;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav a {
+      margin: 0 18px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .nav a:hover {
+      color: #6a11cb;
+    }
+
+    .container {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .flashcards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .card {
+      flex: 1 1 280px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      color: #6a11cb;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .card p {
+      font-size: 28px;
+      font-weight: bold;
+      color: #343a40;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    Dashboard Admin - Homestay Helly AJ
+    <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
+  </div>
+
+  <div class="nav">
+    <a href="/admin/admin_guest_management">Pengurusan Tetamu</a>
+    <a href="/admin/admin_admin_management">Pengurusan Admin</a>
+    <a href="/admin/admin_booking_management">Pengurusan Tempahan</a>
+    <a href="/admin/admin_bill_management">Pengurusan Bil</a>
+  </div>
+
+  <div class="container">
+    <div class="flashcards">
+      <div class="card">
+  <h3>Jumlah Tetamu Berdaftar</h3>
+  <p>{{ num_guests }}</p>
+</div>
+<div class="card">
+  <h3>Tempahan Menunggu Pengesahan</h3>
+  <p>{{ num_pending_bookings }}</p>
+</div>
+<div class="card">
+  <h3>Bil Tertunggak</h3>
+  <p>{{ num_unpaid_bills }}</p>
+</div>
+
+    </div>
+  </div>
+</body>
+</html>

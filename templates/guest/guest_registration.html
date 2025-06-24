@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pendaftaran Tetamu Baharu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #004B97, #D10024);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .register-container {
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      width: 460px;
+      max-width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #004B97;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ced4da;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background: linear-gradient(to right, #D10024, #004B97);
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: linear-gradient(to right, #b3001d, #00356a);
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 15px;
+    }
+
+    .back-link a {
+      color: #004B97;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+
+    .flash-messages {
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .flash-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .flash-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Daftar Akaun Tetamu Baharu</h2>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-messages flash-{{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+<form method="post" action="/guest/guest_registration">
+      <label for="fullname">Nama Penuh:</label>
+      <input type="text" id="fullname" name="fullname" required value="{{ fullname or '' }}">
+
+      <label for="phone">Nombor Telefon:</label>
+      <input type="text" id="phone" name="phone" required value="{{ phone or '' }}">
+
+      <label for="username">Nama Pengguna:</label>
+      <input type="text" id="username" name="username" required value="{{ username or '' }}">
+
+      <label for="password">Kata Laluan:</label>
+<input type="password" id="password" name="password" required>
+
+<label for="confirm_password">Sahkan Kata Laluan:</label>
+<input type="password" id="confirm_password" name="confirm_password" required>
+
+<input type="checkbox" id="show_password"> <label for="show_password">Tunjuk Kata Laluan</label>
+
+
+      <label for="email">E-mel:</label>
+<input type="email" id="email" name="email" value="{{ email or '' }}" required>
+
+
+      <button type="submit">Daftar</button>
+    </form>
+
+    <div class="back-link">
+      <p><a href="/">Kembali ke Log Masuk</a></p>
+    </div>
+  </div>
+</body>
+</html>
+<script>
+  const showPasswordCheckbox = document.getElementById('show_password');
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirm_password');
+
+  showPasswordCheckbox.addEventListener('change', () => {
+    const type = showPasswordCheckbox.checked ? 'text' : 'password';
+    passwordInput.type = type;
+    confirmPasswordInput.type = type;
+  });
+</script>
