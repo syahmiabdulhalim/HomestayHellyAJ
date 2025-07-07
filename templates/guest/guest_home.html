@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
   <title>Dashboard Tetamu - Homestay Helly AJ</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
@@ -110,7 +112,10 @@
       margin-bottom: 8px;
       color: #333;
     }
-
+     ul li a{
+        margin: 0 10px;
+        color: #000000;
+      }
     @media (max-width: 768px) {
       .dashboard-grid {
         grid-template-columns: 1fr;
@@ -122,15 +127,25 @@
         padding: 6px 12px;
         font-size: 13px;
       }
+     
     }
   </style>
 </head>
 <body>
+  
   <div class="header">
     <h1>Selamat Datang, {{ username }} !</h1>
     <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
   </div>
-
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
   <div class="nav">
     <a href="/guest/guest_booking">Buat Tempahan</a>
     <a href="/guest/guest_booking_history">Sejarah Tempahan</a>
@@ -142,10 +157,16 @@
       <!-- Column 1 Row 1 -->
       <div class="dashboard-card">
         <h3>Status Tempahan Terkini</h3>
+         {% for booking in booking %}
         <ul>
-          <li>Tempahan #1234 - Disahkan ✅</li>
-          <li>Tempahan #1233 - Dibatalkan ❌</li>
+          <li>Tempahan: #{{ booking.booking_id }}</li>
+          <li>{{ booking.status }}</li>
         </ul>
+        {% else %}
+        <ul>
+          <li>Tiada tempahan terkini.</li>
+        </ul>
+        {% endfor %}
       </div>
 
       <!-- Column 2 Row 1 -->
@@ -175,14 +196,25 @@
       <div class="dashboard-card">
         <h3>Tarikan Berdekatan (Pasir Gudang)</h3>
         <ul>
-          <li>🌊 Tanjung Puteri Resort (10 minit)</li>
-          <li>🛍️ AEON Permas Jaya (15 minit)</li>
-          <li>🏞️ Hutan Bandar Pasir Gudang (5 minit)</li>
-          <li>⚓ Muzium Layang-Layang Pasir Gudang</li>
-          <li>🍜 Medan Selera Taman Cendana</li>
+          <li>🌊 <a href="https://g.co/kgs/hyJ4bLM">Tanjung Puteri Resort </a>(10 minit)</li>
+          <li>🛍️ <a href="https://g.co/kgs/w6uQ6fD">AEON Permas Jaya</a> (15 minit)</li>
+          <li>🏞️ <a href="https://g.co/kgs/bULi7ma">Hutan Bandar Pasir Gudang </a>(5 minit)</li>
+          <li>⚓ <a href="https://g.co/kgs/XvgK6JD">Muzium Layang-Layang Pasir Gudang</a></li>
+          <li>🍜 <a href="https://g.co/kgs/9828udh">Medan Selera Taman Cendana</a></li>
         </ul>
       </div>
     </div>
   </div>
 </body>
 </html>
+<script>
+  // Auto-hide alert selepas 3 saat (3000ms)
+  setTimeout(function() {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      alert.style.transition = 'opacity 0.5s ease-out';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 500);  // remove after fade out
+    });
+  }, 3000);
+</script>

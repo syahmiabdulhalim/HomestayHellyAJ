@@ -320,15 +320,15 @@ from werkzeug.security import generate_password_hash
 def guest_registration():
     if request.method == 'POST':
         fullname = request.form['fullname']
+        email = request.form['email']
         phone = request.form['phone']
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-        email = request.form['email']
 
         if password != confirm_password:
             flash("Kata laluan dan pengesahan tidak sepadan.", "danger")
-            return render_template('guest/guest_registration.html', fullname=fullname, phone=phone, username=username, email=email)
+            return render_template('guest/guest_registration.html', fullname=fullname, email=email, phone=phone, username=username)
 
         conn = get_db_connection()
         cur = conn.cursor()
@@ -338,15 +338,15 @@ def guest_registration():
 
         if existing_user:
             flash("Nama pengguna sudah wujud. Sila pilih nama pengguna lain.", "danger")
-            return render_template('guest/guest_registration.html', fullname=fullname, phone=phone, username=username, email=email)
+            return render_template('guest/guest_registration.html', fullname=fullname,email=email, phone=phone, username=username)
 
         hashed_password = generate_password_hash(password)
 
         try:
             cur.execute("""
-                INSERT INTO GUEST (FullName, PhoneNo, Username, GPassword, Email)
+                INSERT INTO GUEST (FullName,  Email, PhoneNo, Username, GPassword)
                 VALUES (:1, :2, :3, :4, :5)
-            """, (fullname, phone, username, hashed_password, email))
+            """, (fullname, email, phone, username, hashed_password))
 
             conn.commit()
             flash("Pendaftaran berjaya! Sila log masuk.", "success")
@@ -355,7 +355,7 @@ def guest_registration():
         except Exception as e:
             print("Insert Error:", e)
             flash("Pendaftaran gagal. Sila cuba lagi.", "danger")
-            return render_template('guest/guest_registration.html', fullname=fullname, phone=phone, username=username, email=email)
+            return render_template('guest/guest_registration.html', fullname=fullname, email=email, phone=phone, username=username)
 
         finally:
             cur.close()
@@ -368,11 +368,44 @@ def guest_registration():
 @app.route('/guest/guest_home')
 def guest_home():
     print("DEBUG: Session inside /guest/guest_home →", session)
+
     if 'logged_in' in session and session.get('role') == 'guest':
-        return render_template('guest/guest_home.html', username=session.get('username'))
-    else:
-        flash("Sila log masuk dahulu.", "warning")
-        return redirect(url_for('index'))
+        username = session.get('username')
+
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # Ambil tempahan terbaru untuk pengguna ini
+            cur.execute("""
+                SELECT B.BOOKINGID, B.STATUS
+                FROM BOOKING B
+                JOIN GUEST G ON B.GUESTID = G.GUESTID
+                WHERE G.USERNAME = :1
+                ORDER BY B.CHECKINDATE DESC FETCH FIRST 1 ROWS ONLY
+            """, (username,))
+
+            bookings = []
+            row = cur.fetchone()
+            if row:
+                bookings.append({
+                    "booking_id": row[0],
+                    "status": row[1]
+                })
+
+            return render_template('guest/guest_home.html', username=username, booking=bookings)
+
+        except Exception as e:
+            flash("Ralat sistem semasa memuatkan dashboard: " + str(e), "danger")
+            return redirect(url_for('index'))
+
+        finally:
+            cur.close()
+            conn.close()
+    
+    flash("Sila log masuk dahulu.", "warning")
+    return redirect(url_for('index'))
+
 
 @app.route('/guest/guest_booking', methods=['GET', 'POST'])
 def guest_booking():
@@ -380,30 +413,54 @@ def guest_booking():
         if request.method == 'POST':
             check_in_date = request.form['check_in_date']
             check_out_date = request.form['check_out_date']
-            num_guests = request.form['num_guests']
+            num_guests = int(request.form['num_guests'])
+            extra_hours = int(request.form.get('extra_hours', 0))
 
+            username = session['username']
             try:
                 conn = get_db_connection()
                 cur = conn.cursor()
+
+                # Step 1: Get GUESTID
+                cur.execute("SELECT GUESTID FROM GUEST WHERE USERNAME = :1", (username,))
+                guest_id = cur.fetchone()[0]
+
+                # Step 2: Calculate nights
+                from datetime import datetime
+                check_in_dt = datetime.strptime(check_in_date, '%Y-%m-%d')
+                check_out_dt = datetime.strptime(check_out_date, '%Y-%m-%d')
+                nights = (check_out_dt - check_in_dt).days
+
+                if nights <= 0:
+                    flash("Tarikh keluar mesti selepas tarikh masuk.", "warning")
+                    return render_template('guest/guest_booking.html', **request.form)
+
+                # Step 3: Calculate price
+                price_per_night = 100
+                price_per_extra_hour = 20
+                total_price = (nights * price_per_night) + (extra_hours * price_per_extra_hour)
+
+                # Step 4: Insert
                 cur.execute("""
-                    INSERT INTO BOOKINGS (GUESTID, CHECKINDATE, CHECKOUTDATE, NUMOFGUESTS, STATUS)
+                    INSERT INTO BOOKING (
+                        GUESTID, CHECKINDATE, CHECKOUTDATE, NUMOFGUESTS, EXTRAHOURS, TOTALPRICE, STATUS
+                    )
                     VALUES (
-                        (SELECT GUESTID FROM GUEST WHERE USERNAME = :1),
-                        TO_DATE(:2, 'YYYY-MM-DD'),
-                        TO_DATE(:3, 'YYYY-MM-DD'),
-                        :4,
-                        :5
+                        :1, TO_DATE(:2, 'YYYY-MM-DD'), TO_DATE(:3, 'YYYY-MM-DD'), :4, :5, :6, :7
                     )
                 """, (
-                    session['username'],
+                    guest_id,
                     check_in_date,
                     check_out_date,
                     num_guests,
+                    extra_hours,
+                    total_price,
                     'Menunggu Pengesahan'
                 ))
                 conn.commit()
-                flash("Tempahan anda telah dihantar dan menunggu pengesahan.", "success")
-                return redirect(url_for('guest_booking_history'))
+
+                flash(f"Tempahan berjaya. Jumlah harga: RM{total_price:.2f}", "success")
+                return redirect(url_for('guest_booking'))
 
             except Exception as e:
                 conn.rollback()
@@ -415,41 +472,53 @@ def guest_booking():
                 conn.close()
 
         return render_template('guest/guest_booking.html')
-    
+
     flash("Sila log masuk sebagai tetamu untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
 
 
+
+
 from datetime import datetime
+from flask import session, redirect, url_for, render_template, flash
 
 @app.route('/guest/guest_booking_history')
 def guest_booking_history():
     print("DEBUG: Session inside /guest/guest_booking_history →", session)
+    print("SESSION DEBUG:", dict(session))
 
     if 'logged_in' in session and session['role'] == 'guest':
         username = session['username']
+        rate_per_night = 100  # Harga semalam (boleh ubah ikut kehendak)
 
         try:
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("""
                 SELECT B.BOOKINGID, B.CHECKINDATE, B.CHECKOUTDATE, B.NUMOFGUESTS, B.STATUS
-                FROM BOOKINGS B
+                FROM BOOKING B
                 JOIN GUEST G ON B.GUESTID = G.GUESTID
                 WHERE G.USERNAME = :1
                 ORDER BY B.CHECKINDATE DESC
             """, (username,))
-            bookings = []
+            booking = []
+
             for row in cur.fetchall():
-                bookings.append({
+                check_in = row[1] if isinstance(row[1], datetime) else datetime.strptime(row[1], '%Y-%m-%d')
+                check_out = row[2] if isinstance(row[2], datetime) else datetime.strptime(row[2], '%Y-%m-%d')
+                num_nights = (check_out - check_in).days
+                total_price = num_nights * rate_per_night
+
+                booking.append({
                     "booking_id": row[0],
-                    "check_in": row[1] if isinstance(row[1], datetime) else datetime.strptime(row[1], '%Y-%m-%d'),
-                    "check_out": row[2] if isinstance(row[2], datetime) else datetime.strptime(row[2], '%Y-%m-%d'),
+                    "check_in": check_in.strftime('%Y-%m-%d'),
+                    "check_out": check_out.strftime('%Y-%m-%d'),
                     "num_guests": row[3],
-                    "status": row[4]
+                    "status": row[4],
+                    "total_price": total_price
                 })
 
-            return render_template('guest/guest_booking_history.html', bookings=bookings)
+            return render_template('guest/guest_booking_history.html', booking=booking)
 
         except Exception as e:
             flash("Ralat mendapatkan sejarah tempahan: " + str(e), "danger")
@@ -526,36 +595,7 @@ def guest_profile():
     return redirect(url_for('index'))
 
 
-from werkzeug.security import check_password_hash
 
-@app.route('/log-masuk-tetamu', methods=['GET', 'POST'])
-def login_guest():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        conn = get_db_connection()
-        cur = conn.cursor()
-        try:
-            # Cari tetamu ikut username
-            cur.execute("SELECT GuestID, FullName, GPassword FROM GUEST WHERE Username = :1", (username,))
-            user = cur.fetchone()
-
-            if user and check_password_hash(user[2], password):
-                session['user_id'] = user[0]
-                session['username'] = username
-                session['role'] = 'guest'
-                flash("Selamat datang kembali, " + user[1] + "!", "success")
-                return redirect(url_for('guest_dashboard'))  # tukar ke halaman utama tetamu
-            else:
-                flash("Nama pengguna atau kata laluan salah.", "danger")
-        except Exception as e:
-            print("Login Error:", e)
-            flash("Ralat sistem. Sila cuba lagi.", "danger")
-        finally:
-            cur.close()
-
-    return render_template('guest_login.html')
 
 # --- Laluan Admin ---
 @app.route('/admin/admin_dashboard')

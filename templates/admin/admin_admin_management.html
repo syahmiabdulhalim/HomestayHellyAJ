@@ -190,7 +190,7 @@
     <h2>Pengurusan Akaun Pentadbir</h2>
 
     <div class="action-buttons">
-      <button class="add-guest-btn" onclick="location.href='/tambah-admin'">Daftar Admin</button>
+      <button class="add-guest-btn" onclick="location.href='/admin/tambah_admin'">Daftar Admin</button>
     </div>
 
     <table>
@@ -207,8 +207,11 @@
       <td>{{ admin[0] }}</td>  <!-- ADMINID -->
       <td>{{ admin[1] }}</td>  <!-- USERNAME -->
       <td>
-        <button class="edit-btn">Kemaskini</button>
-        <button class="delete-btn">Padam</button>
+        <button class="edit-btn" onclick="location.href='/admin/kemaskini_admin/{{ admin[0] }}'">Kemaskini</button>
+        <form method="post" action="/admin/delete_admin" style="display:inline;">
+          <input type="hidden" name="admin_id" value="{{ admin[0] }}">
+          <button type="submit" class="delete-btn">Padam</button>
+        </form>
       </td>
     </tr>
     {% endfor %}

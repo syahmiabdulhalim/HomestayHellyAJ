@@ -199,7 +199,7 @@
     <h2>Pengurusan Bil Homestay</h2>
 
     <div class="action-buttons">
-      <button class="add-guest-btn" onclick="location.href='/tambah-bil'">Jana Bil Baharu</button>
+      <button class="add-guest-btn" onclick="location.href='/admin/tambah_bil'">Jana Bil Baharu</button>
     </div>
 
     <table>
@@ -238,7 +238,7 @@
         </form>
 
         {% if bill[4] != 'Telah Dibayar' %}
-        <form method="post" style="display:inline;">
+        <form method="post" action="/admin/tandakan-bil-dibayar" style="display:inline;">
           <input type="hidden" name="bill_id" value="{{ bill[0] }}">
           <input type="hidden" name="status" value="Telah Dibayar">
           <button type="submit" class="mark-paid-btn">Tandakan Dibayar</button>
