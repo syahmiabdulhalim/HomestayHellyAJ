@@ -857,6 +857,44 @@ def kemaskini_tetamu(guest_id):
     flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
 
+# Route for displaying the form to add a new guest
+@app.route('/tambah-tetamu-manual', methods=['GET', 'POST'])
+def tambah_tetamu_manual():
+    # You might want to add a login check here
+    if 'logged_in' not in session or session['role'] != 'admin':
+        flash('Sila log masuk sebagai admin untuk mengakses halaman ini.', 'danger')
+        return redirect(url_for('login_admin')) # Assuming 'login_admin' is your admin login route
+
+    if request.method == 'POST':
+        # This block handles the form submission when a new guest is registered
+        guest_id = request.form['guest_id'] # Assuming you have an input for guest_id
+        fullname = request.form['fullname']
+        email = request.form['email']
+        phoneno = request.form['phoneno']
+        username = request.form['username']
+        password = request.form['password'] # Remember to hash passwords in a real app!
+
+        try:
+            # Connect to your Oracle database
+            # Example using cx_Oracle (replace with your actual connection logic)
+            # conn = oracle_db_connect()
+            # cursor = conn.cursor()
+            # cursor.execute("INSERT INTO GUEST (GUESTID, FULLNAME, EMAIL, PHONENO, USERNAME, PASSWORD) VALUES (:1, :2, :3, :4, :5, :6)",
+            #                (guest_id, fullname, email, phoneno, username, password))
+            # conn.commit()
+            # cursor.close()
+            # conn.close()
+
+            flash('Tetamu berjaya didaftarkan!', 'success')
+            return redirect(url_for('admin_guest_management')) # Redirect back to guest list
+        except Exception as e:
+            flash(f'Ralat semasa pendaftaran tetamu: {str(e)}', 'danger')
+            # You might want to log the full error for debugging
+            print(f"Error registering guest: {e}")
+
+    # This block handles the GET request to display the form
+    return render_template('tambah_tetamu_manual.html')
+
 @app.route('/tandakan-dibayar/<bill_id>')
 def mark_bill_paid(bill_id):
     if 'logged_in' in session and session['role'] == 'admin':

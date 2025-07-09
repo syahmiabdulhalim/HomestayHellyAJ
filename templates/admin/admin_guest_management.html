@@ -230,5 +230,217 @@
     </div>
   </div>
 
+<!-- Edit Guest Modal -->
+  <div id="editGuestModal" class="fixed inset-0 flex items-center justify-center hidden modal-overlay">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 modal-content">
+          <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Edit Butiran Tetamu</h2>
+          <form id="editGuestForm">
+              <input type="hidden" id="editGuestId">
+              <div class="mb-4">
+                  <label for="editGuestName" class="block text-gray-700 text-sm font-bold mb-2">Nama Penuh:</label>
+                  <input type="text" id="editGuestName" name="fullname" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+              </div>
+              <div class="mb-4">
+                  <label for="editGuestEmail" class="block text-gray-700 text-sm font-bold mb-2">E-mel:</label>
+                  <input type="email" id="editGuestEmail" name="email" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+              </div>
+              <div class="mb-4">
+                  <label for="editGuestPhone" class="block text-gray-700 text-sm font-bold mb-2">No. Telefon:</label>
+                  <input type="text" id="editGuestPhone" name="phone" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+              </div>
+              <div class="mb-6">
+                  <label for="editGuestUsername" class="block text-gray-700 text-sm font-bold mb-2">Nama Pengguna:</label>
+                  <input type="text" id="editGuestUsername" name="username" class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+              </div>
+              <div class="flex items-center justify-between">
+                  <button type="submit" class="px-6 py-2 rounded-md text-white font-semibold edit-btn">Simpan Perubahan</button>
+                  <button type="button" id="cancelEdit" class="px-6 py-2 rounded-md text-white font-semibold delete-btn" style="background-color: #6c757d;">Batal</button>
+              </div>
+          </form>
+      </div>
+  </div>
+
+  <!-- Custom Message Box for Confirmations/Alerts -->
+  <div id="customMessageBox" class="fixed inset-0 flex items-center justify-center hidden modal-overlay">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4 text-center modal-content">
+          <p id="messageBoxText" class="text-gray-800 text-lg mb-6"></p>
+          <div class="flex justify-center space-x-4">
+              <button id="messageBoxConfirm" class="px-6 py-2 rounded-md text-white font-semibold delete-btn hidden">Sahkan</button>
+              <button id="messageBoxCancel" class="px-6 py-2 rounded-md text-white font-semibold edit-btn hidden" style="background-color: #6c757d;">Batal</button>
+              <button id="messageBoxOK" class="px-6 py-2 rounded-md text-white font-semibold add-guest-btn hidden">OK</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const guestTable = document.getElementById('guestTable');
+          const editGuestModal = document.getElementById('editGuestModal');
+          const editGuestForm = document.getElementById('editGuestForm');
+          const editGuestId = document.getElementById('editGuestId');
+          const editGuestName = document.getElementById('editGuestName');
+          const editGuestEmail = document.getElementById('editGuestEmail');
+          const editGuestPhone = document.getElementById('editGuestPhone');
+          const editGuestUsername = document.getElementById('editGuestUsername'); 
+          const cancelEditButton = document.getElementById('cancelEdit');
+
+          const messageBox = document.getElementById('customMessageBox');
+          const messageBoxText = document.getElementById('messageBoxText');
+          const messageBoxConfirm = document.getElementById('messageBoxConfirm');
+          const messageBoxCancel = document.getElementById('messageBoxCancel');
+          const messageBoxOK = document.getElementById('messageBoxOK');
+
+          // Function to show custom message box
+          function showMessageBox(message, type, onConfirm = null) {
+              messageBoxText.textContent = message;
+              messageBoxConfirm.classList.add('hidden');
+              messageBoxCancel.classList.add('hidden');
+              messageBoxOK.classList.add('hidden');
+
+              if (type === 'confirm') {
+                  messageBoxConfirm.classList.remove('hidden');
+                  messageBoxCancel.classList.remove('hidden');
+                  messageBoxConfirm.onclick = () => {
+                      messageBox.classList.add('hidden');
+                      if (onConfirm) onConfirm(true);
+                  };
+                  messageBoxCancel.onclick = () => {
+                      messageBox.classList.add('hidden');
+                      if (onConfirm) onConfirm(false);
+                  };
+              } else { // 'alert' type
+                  messageBoxOK.classList.remove('hidden');
+                  messageBoxOK.onclick = () => {
+                      messageBox.classList.add('hidden');
+                      if (onConfirm) onConfirm(); // For alert, just call callback without arg
+                  };
+              }
+              messageBox.classList.remove('hidden');
+          }
+
+          // Event delegation for edit and delete buttons
+          guestTable.addEventListener('click', (event) => {
+              const target = event.target;
+              const row = target.closest('tr');
+              if (!row) return; // Click was not inside a row
+
+              // Get guest ID from the data-guest-id attribute on the <tr>
+              const guestId = row.dataset.guestId;
+
+              if (target.classList.contains('delete-btn')) {
+                  showMessageBox(`Adakah anda pasti ingin memadamkan ID Tetamu ${guestId}? Tindakan ini tidak boleh dibatalkan.`, 'confirm', (confirmed) => {
+                      if (confirmed) {
+                          deleteGuest(guestId, row);
+                      }
+                  });
+              } else if (target.classList.contains('edit-btn')) {
+                  editGuest(guestId, row);
+              }
+          });
+
+          // Function to handle guest deletion
+          function deleteGuest(guestId, rowElement) {
+              console.log(`Attempting to delete Guest ID: ${guestId}`);
+              // In a real application, you would send an API request to your backend here
+              // Example:
+              /*
+              fetch(`/api/guests/${guestId}`, {
+                  method: 'DELETE'
+              })
+              .then(response => {
+                  if (response.ok) {
+                      rowElement.remove(); // Remove the row from the DOM
+                      showMessageBox(`ID Tetamu ${guestId} berjaya dipadamkan!`, 'alert');
+                  } else {
+                      showMessageBox(`Gagal memadamkan ID Tetamu ${guestId}.`, 'alert');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error deleting guest:', error);
+                  showMessageBox('Ralat berlaku semasa pemadaman.', 'alert');
+              });
+              */
+              
+              // --- Simulation for demonstration ---
+              rowElement.remove(); // Visually remove the row
+              showMessageBox(`ID Tetamu ${guestId} berjaya dipadamkan! (Simulasi)`, 'alert');
+              // --- End Simulation ---
+          }
+
+          // Function to handle guest editing (open modal)
+          function editGuest(guestId, rowElement) {
+              // Populate the modal form with current guest data from the row
+              const cells = rowElement.querySelectorAll('td');
+              editGuestId.value = guestId;
+              editGuestName.value = cells[1].textContent;   // Nama Penuh
+              editGuestEmail.value = cells[2].textContent;  // E-mel
+              editGuestPhone.value = cells[3].textContent;  // No. Telefon
+              editGuestUsername.value = cells[4].textContent; // Nama Pengguna
+
+              editGuestModal.classList.remove('hidden'); // Show the modal
+          }
+
+          // Handle form submission for saving edited guest details
+          editGuestForm.addEventListener('submit', (event) => {
+              event.preventDefault(); // Prevent default form submission
+
+              const guestId = editGuestId.value;
+              const updatedName = editGuestName.value;
+              const updatedEmail = editGuestEmail.value;
+              const updatedPhone = editGuestPhone.value;
+              const updatedUsername = editGuestUsername.value; 
+
+              console.log(`Attempting to update Guest ID: ${guestId}`);
+              console.log(`New Data: Name=${updatedName}, Email=${updatedEmail}, Phone=${updatedPhone}, Username=${updatedUsername}`);
+
+              // Create FormData object to send data as application/x-www-form-urlencoded
+              const formData = new FormData();
+              formData.append('fullname', updatedName);
+              formData.append('email', updatedEmail);
+              formData.append('phone', updatedPhone);
+              formData.append('username', updatedUsername);
+
+              // Send API request to your backend
+              fetch(`/admin/kemaskini-tetamu/${guestId}`, {
+                  method: 'POST', // Flask route expects POST
+                  body: formData // Send as FormData
+              })
+              .then(response => response.json()) // Expect JSON response from Flask
+              .then(data => {
+                  if (data.status === 'success') {
+                      // Update the row in the DOM
+                      const rowToUpdate = document.querySelector(`tr[data-guest-id="${guestId}"]`);
+                      if (rowToUpdate) {
+                          const cells = rowToUpdate.querySelectorAll('td');
+                          cells[1].textContent = updatedName;
+                          cells[2].textContent = updatedEmail;
+                          cells[3].textContent = updatedPhone;
+                          cells[4].textContent = updatedUsername; 
+                      }
+                      editGuestModal.classList.add('hidden'); // Hide the modal
+                      showMessageBox(`ID Tetamu ${guestId} berjaya dikemaskini!`, 'alert');
+                  } else {
+                      showMessageBox(`Gagal mengemaskini ID Tetamu ${guestId}: ${data.message || 'Ralat tidak diketahui.'}`, 'alert');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error updating guest:', error);
+                  showMessageBox('Ralat berlaku semasa pengemaskinian.', 'alert');
+              });
+          });
+
+          // Close modal when cancel button is clicked
+          cancelEditButton.addEventListener('click', () => {
+              editGuestModal.classList.add('hidden');
+          });
+
+          // Close modal when clicking outside of it
+          editGuestModal.addEventListener('click', (event) => {
+              if (event.target === editGuestModal) {
+                  editGuestModal.classList.add('hidden');
+              }
+          });
+      });
+  </script>
 </body>
 </html>
