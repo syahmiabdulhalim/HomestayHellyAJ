@@ -36,7 +36,7 @@
     }
 
     input[type="text"],
-    input[type="email"] {
+    input[type="email"], input[type="password"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #ced4da;
@@ -103,23 +103,29 @@
   <div class="container">
     <h2>Kemaskini Maklumat Tetamu</h2>
     <form method="POST" action="{{ url_for('kemaskini_tetamu', guest_id=guest[0]) }}">
-      <label for="fullname">Nama Penuh:</label>
-      <input type="text" id="fullname" name="fullname" value="{{ guest[1] }}" required>
+  <label>Nama Penuh:</label>
+  <input type="text" name="fullname" value="{{ guest[1] }}" required>
 
-      <label for="email">E-mel:</label>
-      <input type="email" id="email" name="email" value="{{ guest[2] }}" required>
+  <label>E-mel:</label>
+  <input type="email" name="email" value="{{ guest[5] }}" required>
 
-      <label for="phone">No. Telefon:</label>
-      <input type="text" id="phone" name="phone" value="{{ guest[3] }}" required>
+  <label>No Telefon:</label>
+  <input type="text" name="phone" value="{{ guest[2] }}" required>
 
-      <label for="username">Nama Pengguna:</label>
-      <input type="text" id="username" name="username" value="{{ guest[4] }}" required>
+  <label>Nama Pengguna:</label>
+  <input type="text" name="username" value="{{ guest[3] }}" required>
 
-      <div class="button-group">
-        <button type="submit" class="save-btn">Simpan</button>
-        <a href="{{ url_for('admin_guest_management') }}" class="cancel-btn" style="text-align: center; line-height: 44px;">Batal</a>
-      </div>
-    </form>
+  <label>Katalaluan (biarkan kosong jika tidak ingin ubah):</label>
+  <input type="password" name="password" value="{{ guest[4] }}" placeholder="Katalaluan baru (jika ingin ubah)">
+
+  <input type="hidden" name="guest_id" value="{{ guest[0] }}">
+
+  <div class="button-group">
+    <button type="submit" class="save-btn">Simpan</button>
+    <a href="{{ url_for('admin_guest_management') }}" class="cancel-btn">Batal</a>
+  </div>
+</form>
+
 
     <div class="back-link">
       <p><a href="{{ url_for('admin_guest_management') }}">← Kembali ke Pengurusan Tetamu</a></p>

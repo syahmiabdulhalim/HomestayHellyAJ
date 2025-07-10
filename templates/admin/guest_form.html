@@ -103,6 +103,9 @@
       <label>Nama Pengguna:</label>
       <input type="text" name="username" value="{{ guest.USERNAME if guest else '' }}" required>
 
+      <label>Password:</label>
+      <input type="text" name="password" value="{{ guest.GPASSWORD if guest else '' }}" required>
+
       <button type="submit">{{ mode }}</button>
     </form>
 

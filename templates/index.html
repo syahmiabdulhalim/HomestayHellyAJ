@@ -186,6 +186,8 @@
       <form action="/" method="post">
         <input type="text" id="username" name="username" placeholder="Nama Pengguna" required />
         <input type="password" id="password" name="password" placeholder="Kata Laluan" required />
+        <input type="checkbox" id="show_password"> <label for="show_password">Tunjuk Kata Laluan</label>
+        
         <button type="submit">Log Masuk</button>
       </form>
       <div class="register-link">
@@ -210,4 +212,11 @@
       setTimeout(() => alert.remove(), 500);  // remove after fade out
     });
   }, 3000);
+
+  
+          document.getElementById('show_password').addEventListener('change', function() {
+            const passwordField = document.getElementById('password');
+            passwordField.type = this.checked ? 'text' : 'password';
+          });
+        
 </script>

@@ -231,13 +231,15 @@
   <td>{{ guest[3] }}</td>  {# PHONENO #}
   <td>{{ guest[4] }}</td>  {# USERNAME #}
   <td>
-    <form action="{{ url_for('kemaskini_tetamu', guest_id=guest[0]) }}" method="get" style="display:inline;">
-  <button type="submit" class="edit-btn">Kemaskini</button>
-</form>
-
-    <form action="{{ url_for('padam_tetamu', guest_id=guest[0]) }}" method="post" style="display:inline;" onsubmit="return confirm('Padam tetamu ini?')">
-  <button type="submit" class="delete-btn">Padam</button>
-</form>
+    <div classname="flex flex-row justify-center items-center">
+      <form action="{{ url_for('padam_tetamu', guest_id=guest[0]) }}" method="post" style="display:inline;">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit" class="delete-btn">Padam</button>
+      </form>
+      <form action="{{ url_for('kemaskini_tetamu', guest_id=guest[0]) }}" method="get" style="display:inline;">
+        <button type="submit" class="edit-btn">Kemaskini</button>
+    </div>
+      </form>
 
   </td>
 </tr>

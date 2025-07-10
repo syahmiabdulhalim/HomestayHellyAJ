@@ -685,21 +685,44 @@ def kemaskini_tetamu(guest_id):
                 email = request.form.get('email')
                 phone = request.form.get('phone')
                 username = request.form.get('username')
+                guest_id = request.form.get('guest_id')
 
-                cur.execute("""
-                    UPDATE GUEST 
-                    SET FULLNAME=:1, EMAIL=:2, PHONENO=:3, USERNAME=:4 
-                    WHERE GUESTID=:5
-                """, (fullname, email, phone, username, guest_id))
+                if not fullname or not email or not phone or not username:
+                    flash("Sila isi semua medan yang diperlukan.", "warning")
+                    return redirect(url_for('kemaskini_tetamu', guest_id=guest_id))
+
+                # Check if username exists (and exclude the current guest)
+                cur.execute("SELECT * FROM GUEST WHERE USERNAME = :1 AND GUESTID != :2", (username, guest_id))
+                if cur.fetchone():
+                    flash("Nama pengguna sudah wujud. Sila pilih nama pengguna lain.", "danger")
+                    return redirect(url_for('kemaskini_tetamu', guest_id=guest_id))
+
+                if request.form.get('password'):
+                    password = request.form['password']
+                    cur.execute("""
+                        UPDATE GUEST 
+                        SET FULLNAME = :1, EMAIL = :2, PHONENO = :3, USERNAME = :4, GPASSWORD = :5 
+                        WHERE GUESTID = :6
+                    """, (fullname, email, phone, username, generate_password_hash(password), guest_id))
+                else:
+                    # Update without password
+                    cur.execute("""
+                        UPDATE GUEST 
+                        SET FULLNAME = :1, EMAIL = :2, PHONENO = :3, USERNAME = :4 
+                        WHERE GUESTID = :5
+                    """, (fullname, email, phone, username, guest_id))
+
                 conn.commit()
                 flash("Butiran tetamu berjaya dikemaskini!", "success")
                 return redirect(url_for('admin_guest_management'))
+
             except Exception as e:
                 flash(f"Ralat semasa mengemaskini: {e}", "danger")
                 return redirect(url_for('admin_guest_management'))
             finally:
                 cur.close()
                 conn.close()
+
 
         else:  # GET
             try:
@@ -716,6 +739,7 @@ def kemaskini_tetamu(guest_id):
     else:
         flash("Sila log masuk sebagai admin.", "warning")
         return redirect(url_for('index'))
+
 
 
 @app.route('/admin/padam-tetamu/<int:guest_id>', methods=['POST'])
