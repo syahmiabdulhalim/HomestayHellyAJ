@@ -505,33 +505,39 @@ def guest_booking_history():
     if 'logged_in' in session and session['role'] == 'guest':
         username = session['username']
         rate_per_night = 100  # Harga semalam (boleh ubah ikut kehendak)
-
+        rate_extra_hour = 20  # Harga setiap jam tambahan (boleh ubah ikut kehendak)
         try:
             conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("""
-                SELECT B.BOOKINGID, B.CHECKINDATE, B.CHECKOUTDATE, B.NUMOFGUESTS, B.STATUS
+                SELECT B.BOOKINGID, B.CHECKINDATE, B.CHECKOUTDATE, B.NUMOFGUESTS, B.EXTRAHOURS, B.STATUS
                 FROM BOOKING B
                 JOIN GUEST G ON B.GUESTID = G.GUESTID
                 WHERE G.USERNAME = :1
                 ORDER BY B.CHECKINDATE DESC
             """, (username,))
+
             booking = []
 
             for row in cur.fetchall():
                 check_in = row[1] if isinstance(row[1], datetime) else datetime.strptime(row[1], '%Y-%m-%d')
                 check_out = row[2] if isinstance(row[2], datetime) else datetime.strptime(row[2], '%Y-%m-%d')
+                num_guests = row[3]
+                extra_hours = row[4] or 0
+                status = row[5]
+
                 num_nights = (check_out - check_in).days
-                total_price = num_nights * rate_per_night
+                total_price = (num_nights * rate_per_night) + (extra_hours * rate_extra_hour)
 
                 booking.append({
                     "booking_id": row[0],
                     "check_in": check_in.strftime('%Y-%m-%d'),
                     "check_out": check_out.strftime('%Y-%m-%d'),
-                    "num_guests": row[3],
-                    "status": row[4],
+                    "num_guests": num_guests,
+                    "status": status,
                     "total_price": total_price
                 })
+
 
             return render_template('guest/guest_booking_history.html', booking=booking)
 
