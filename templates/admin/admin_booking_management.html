@@ -2,6 +2,8 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pengurusan Tempahan</title>
   <style>
@@ -160,6 +162,17 @@
 
   <!-- MAIN CONTAINER -->
   <div class="management-container">
+     {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+
+            {{ message }}
+            </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     <h2>Pengurusan Tempahan Tetamu</h2>
     <table>
       <thead>
@@ -206,3 +219,14 @@
 
 </body>
 </html>
+<script>
+  // Auto-hide alert selepas 3 saat (3000ms)
+  setTimeout(function() {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      alert.style.transition = 'opacity 0.5s ease-out';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 500);  // remove after fade out
+    });
+  }, 3000);
+</script>

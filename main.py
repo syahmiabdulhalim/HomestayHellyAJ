@@ -732,6 +732,40 @@ def padam_tetamu(guest_id):
     flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
 
+@app.route('/admin/tambah_tetamu', methods=['GET', 'POST'])
+def tambah_tetamu():
+    if 'logged_in' not in session or session['role'] != 'admin':
+        flash("Sila log masuk sebagai admin.", "warning")
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        fullname = request.form['fullname']
+        email = request.form['email']
+        phone = request.form['phone']
+        username = request.form['username']
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO GUEST (FULLNAME, EMAIL, PHONENO, USERNAME)
+                VALUES (:1, :2, :3, :4)
+            """, (fullname, email, phone, username))
+            conn.commit()
+            flash("Tetamu berjaya ditambah!", "success")
+        except Exception as e:
+            flash("Ralat tambah tetamu: " + str(e), "danger")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for('admin_guest_management'))
+
+    # GET request
+    return render_template(
+        'admin/guest_form.html',
+        mode='Daftar',
+        action_url=url_for('tambah_tetamu'),
+        guest=None
+    )
 
 
 
