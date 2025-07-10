@@ -718,19 +718,39 @@ def padam_tetamu(guest_id):
         try:
             conn = get_db_connection()
             cur = conn.cursor()
+
+            # 1. Padam semua kenderaan milik tetamu ini
+            cur.execute("DELETE FROM VEHICLE WHERE GUESTID = :1", (guest_id,))
+
+            # 2. Dapatkan semua booking ID berkait
+            cur.execute("SELECT BOOKINGID FROM BOOKING WHERE GUESTID = :1", (guest_id,))
+            booking_ids = cur.fetchall()
+
+            # 3. Padam semua bill untuk setiap booking
+            for booking in booking_ids:
+                cur.execute("DELETE FROM BILL WHERE BOOKINGID = :1", (booking[0],))
+
+            # 4. Padam semua booking
+            cur.execute("DELETE FROM BOOKING WHERE GUESTID = :1", (guest_id,))
+
+            # 5. Padam GUEST
             cur.execute("DELETE FROM GUEST WHERE GUESTID = :1", (guest_id,))
+
             conn.commit()
-            flash("Tetamu berjaya dipadam.", "success")
+            flash("Tetamu dan semua data berkaitan berjaya dipadam.", "success")
         except Exception as e:
             conn.rollback()
             flash(f"Ralat semasa memadam tetamu: {e}", "danger")
         finally:
             cur.close()
             conn.close()
+
         return redirect(url_for('admin_guest_management'))
 
     flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
+
+
 
 @app.route('/admin/tambah_tetamu', methods=['GET', 'POST'])
 def tambah_tetamu():
