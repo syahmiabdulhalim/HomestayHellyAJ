@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Resit Pembayaran</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      padding: 40px;
+      color: #333;
+    }
+
+    .receipt-container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .receipt-header {
+      text-align: center;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .receipt-header h1 {
+      margin: 0;
+      color: #007bff;
+      font-size: 28px;
+    }
+
+    .receipt-header small {
+      color: #555;
+    }
+
+    .receipt-details {
+      margin-bottom: 25px;
+    }
+
+    .receipt-details h3 {
+      margin-bottom: 10px;
+      color: #333;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    .receipt-details table {
+      width: 100%;
+    }
+
+    .receipt-details td {
+      padding: 8px 0;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #555;
+      width: 180px;
+    }
+
+    .status-paid {
+      color: #28a745;
+      font-weight: bold;
+    }
+
+    .status-unpaid {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .print-button {
+      display: block;
+      margin: 30px auto 0;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  text-decoration: none;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.print-button:hover {
+      background-color: #0056b3;
+    }
+
+    @media print {
+      .print-button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="receipt-container">
+  <div class="receipt-header">
+    <h1>Resit Pembayaran</h1>
+    <small>Homestay Helly AJ</small>
+  </div>
+
+  <div class="receipt-details">
+    <h3>Maklumat Bil</h3>
+    <table>
+      <tr>
+        <td class="label">ID Bil:</td>
+        <td>{{ bill[0] }}</td>
+      </tr>
+      <tr>
+        <td class="label">ID Tempahan:</td>
+        <td>{{ bill[1] }}</td>
+      </tr>
+      <tr>
+        <td class="label">Nama Tetamu:</td>
+        <td>{{ bill[2] }}</td>
+      </tr>
+      <tr>
+        <td class="label">Jumlah Bayaran (RM):</td>
+        <td><strong>RM{{ "%.2f"|format(bill[3]) }}</strong></td>
+      </tr>
+      <tr>
+        <td class="label">Tarikh Dikeluarkan:</td>
+        <td>{{ bill[4] }}</td>
+      </tr>
+      <tr>
+        <td class="label">Status:</td>
+        <td class="{% if bill[5] == 'Telah Dibayar' %}status-paid{% else %}status-unpaid{% endif %}">{{ bill[5] }}</td>
+      </tr>
+    </table>
+  </div>
+<div class="center-text flex justify-content-center">
+<button class="print-button" onclick="window.print()">🖨️ Cetak Resit</button>
+        <button class="print-button" onclick="location.href='/admin/admin_bill_management'">Kembali</button>
+</div>
+  
+    
+</div>
+ 
+</body>
+</html>

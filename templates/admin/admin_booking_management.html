@@ -183,9 +183,14 @@
   <td>{{ booking.guests }}</td>
   <td class="status-{{ booking.status | lower | replace(' ', '-') }}">{{ booking.status }}</td>
   <td>
+  {% if booking.status == 'Menunggu Pengesahan' %}
     <a href="/sahkan-tempahan/{{ booking.id }}" class="action-btn edit" onclick="return confirm('Sahkan tempahan ini?')">Sahkan</a>
     <a href="/batalkan-tempahan/{{ booking.id }}" class="action-btn reject" onclick="return confirm('Adakah anda pasti mahu batalkan tempahan ini?')">Batalkan</a>
-  </td>
+  {% else %}
+    <span style="color: gray; font-style: italic;">Tiada tindakan</span>
+  {% endif %}
+</td>
+
 </tr>
         {% else %}
         <tr>

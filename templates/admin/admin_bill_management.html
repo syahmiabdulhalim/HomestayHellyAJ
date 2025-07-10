@@ -197,10 +197,10 @@
 
   <div class="management-container">
     <h2>Pengurusan Bil Homestay</h2>
-
+<!-- 
     <div class="action-buttons">
       <button class="add-guest-btn" onclick="location.href='/admin/tambah_bil'">Jana Bil Baharu</button>
-    </div>
+    </div> -->
 
     <table>
       <thead>
@@ -216,37 +216,36 @@
       </thead>
       <tbody>
   {% for bill in bills %}
-    <tr>
-      <td>{{ bill[0] }}</td> <!-- BILLID -->
-      <td>{{ bill[1] }}</td> <!-- BOOKINGID -->
-      <td>
-        {% if bill[5] %}
-          {{ bill[5] }}
-        {% else %}
-          -
-        {% endif %}
-      </td> <!-- Nama Tetamu -->
-      <td>{{ bill[2] }}</td> <!-- AMOUNT -->
-      <td>{{ bill[3].strftime('%Y-%m-%d') }}</td> <!-- ISSUEDDATE -->
-      <td class="{% if bill[4] == 'Telah Dibayar' %}status-paid{% else %}status-unpaid{% endif %}">
-        {{ bill[4] }}
-      </td>
-      <td>
-        <form method="post" style="display:inline;">
-          <input type="hidden" name="bill_id" value="{{ bill[0] }}">
-          <button class="view-btn" formaction="/lihat-bil/{{ bill[0] }}">Lihat</button>
-        </form>
+<tr>
+  <td>{{ bill[0] }}</td> <!-- BILLID -->
+  <td>{{ bill[1] }}</td> <!-- BOOKINGID -->
+  <td>{{ bill[2] }}</td> <!-- Nama Tetamu -->
+  <td>{{ bill[3] }}</td> <!-- AMOUNT -->
+  <td>{{ bill[4] }}</td> <!-- ISSUEDDATE -->
+  <td class="{% if bill[5] == 'Telah Dibayar' %}status-paid{% else %}status-unpaid{% endif %}">
+    {{ bill[5] }}
+  </td>
+  <td>
+    <form method="post" style="display:inline;">
+      <input type="hidden" name="bill_id" value="{{ bill[0] }}">
+      <button class="view-btn" formaction="/lihat-bil/{{ bill[0] }}">Lihat</button>
+    </form>
 
-        {% if bill[4] != 'Telah Dibayar' %}
-        <form method="post" action="/admin/tandakan-bil-dibayar" style="display:inline;">
-          <input type="hidden" name="bill_id" value="{{ bill[0] }}">
-          <input type="hidden" name="status" value="Telah Dibayar">
-          <button type="submit" class="mark-paid-btn">Tandakan Dibayar</button>
-        </form>
-        {% endif %}
-      </td>
-    </tr>
-  {% endfor %}
+    {% if bill[5] != 'Telah Dibayar' %}
+    <form method="post" action="/admin/tandakan-bil-dibayar" style="display:inline;">
+  <input type="hidden" name="bill_id" value="{{ bill[0] }}">
+  <input type="hidden" name="status" value="Telah Dibayar">
+  <button type="submit" class="mark-paid-btn" onclick="return confirm('Adakah anda pasti ingin tandakan bil ini sebagai telah dibayar?')">Tandakan Dibayar</button>
+</form>
+
+  
+    
+    
+
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
 </tbody>
 
     </table>

@@ -77,13 +77,14 @@
 <body>
   <div class="form-container">
     <h2>Daftar Admin Baru</h2>
-    <form method="post" action="/admin/tambah_admin">
+  <form method="post" action="/admin/kemaskini_admin/{{ admin[0] }}">
   <label>Nama Pengguna:</label>
-  <input type="text" name="username" required>
-  <label>Katalaluan:</label>
+  <input type="text" name="username" value="{{ admin[1] }}" required>
+  <label>Katalaluan Baru:</label>
   <input type="password" name="password" required>
-  <button type="submit">Tambah</button>
+  <button type="submit">Kemaskini</button>
 </form>
+
     {% if error %}
       <p style="color: red; text-align: center;">{{ error }}</p>
     {% endif %}

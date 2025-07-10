@@ -11,26 +11,26 @@ app.secret_key = os.urandom(24)
 
 # --- Struktur Data Sementara (akan diganti dengan interaksi Pangkalan Data Oracle) ---
 # DALAM APLIKASI SEBENAR, JANGAN SIMPAN KATA LALUAN DALAM TEKS BIASA. Gunakan hashing!
-# users_db = {
-#     "guest_users": {
-#         "guest1": {"password": "pass1", "role": "guest", "fullname": "Ahmad Bin Abu", "email": "ahmad@example.com", "phone": "0123456789"},
-#         "siti": {"password": "siti123", "role": "guest", "fullname": "Siti Nurhaliza", "email": "siti@email.com", "phone": "0198765432"},
-#     },
-#     "admin_users": {
-#         "admin1": {"password": "adminpass", "role": "admin", "email": "admin@homestay.com"},
-#         "helly": {"password": "hellyadmin", "role": "admin", "email": "helly@homestay.com"},
-#     }
-# }
+users_db = {
+    "guest_users": {
+        "guest1": {"password": "pass1", "role": "guest", "fullname": "Ahmad Bin Abu", "email": "ahmad@example.com", "phone": "0123456789"},
+        "siti": {"password": "siti123", "role": "guest", "fullname": "Siti Nurhaliza", "email": "siti@email.com", "phone": "0198765432"},
+    },
+    "admin_users": {
+        "admin1": {"password": "adminpass", "role": "admin", "email": "admin@homestay.com"},
+        "helly": {"password": "hellyadmin", "role": "admin", "email": "helly@homestay.com"},
+    }
+}
 
-# bookings_db = [
-#     {"booking_id": "B001", "guest_username": "guest1", "check_in": "2025-07-01", "check_out": "2025-07-05", "num_guests": 4, "vehicle_type": "Kereta", "status": "Disahkan"},
-#     {"booking_id": "B002", "guest_username": "siti", "check_in": "2025-08-10", "check_out": "2025-08-12", "num_guests": 2, "vehicle_type": "Tiada", "status": "Menunggu Pengesahan"},
-# ]
+bookings_db = [
+    {"booking_id": "B001", "guest_username": "guest1", "check_in": "2025-07-01", "check_out": "2025-07-05", "num_guests": 4, "vehicle_type": "Kereta", "status": "Disahkan"},
+    {"booking_id": "B002", "guest_username": "siti", "check_in": "2025-08-10", "check_out": "2025-08-12", "num_guests": 2, "vehicle_type": "Tiada", "status": "Menunggu Pengesahan"},
+]
 
-# bills_db = [
-#     {"bill_id": "BIL001", "booking_id": "B001", "guest_username": "guest1", "amount": 300.00, "generated_date": "2025-06-10", "status": "Dibayar"},
-#     {"bill_id": "BIL002", "booking_id": "B002", "guest_username": "siti", "amount": 200.00, "generated_date": "2025-08-01", "status": "Belum Dibayar"},
-# ]
+bills_db = [
+    {"bill_id": "BIL001", "booking_id": "B001", "guest_username": "guest1", "amount": 300.00, "generated_date": "2025-06-10", "status": "Dibayar"},
+    {"bill_id": "BIL002", "booking_id": "B002", "guest_username": "siti", "amount": 200.00, "generated_date": "2025-08-01", "status": "Belum Dibayar"},
+]
 
 def query_bookings():
     try:
@@ -47,17 +47,32 @@ def query_bookings():
 
 # --- Fungsi Pembantu untuk interaksi DB sementara (akan diganti dengan Oracle) ---
 def get_db_connection():
-    conn = oracledb.connect(
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        dsn=os.getenv("DB_DSN")
+    dsn = oracledb.makedsn("localhost", 1521, service_name="FREEPDB1")
+    return oracledb.connect(
+        user="system",
+        password="Admin#123",
+        dsn=dsn
     )
     return conn
 try:
     conn = get_db_connection()
-    print("✅ Connected to Oracle DB")
-except Exception as e:
-    print("❌ Connection failed:", e)
+    cur = conn.cursor()
+    # do queries
+except oracledb.DatabaseError as e:
+    error, = e.args
+    print(f"❌ Oracle DB Error: {error.message}")
+finally:
+    try:
+        cur.close()
+        conn.close()
+    except:
+        pass
+
+# try:
+#     conn = get_db_connection()
+#     print("✅ Connected to Oracle DB")
+# except Exception as e:
+#     print("❌ Connection failed:", e)
 
 
 
@@ -597,41 +612,40 @@ def guest_profile():
 
 
 
-# --- Laluan Admin ---
 @app.route('/admin/admin_dashboard')
 def admin_dashboard():
-    print("DEBUG: Session inside /admin_dashboard →", session)
     if 'logged_in' in session and session['role'] == 'admin':
         try:
             conn = get_db_connection()
             cur = conn.cursor()
 
-            # 1. Bilangan tetamu
-            cur.execute("SELECT COUNT(*) FROM Guest")
+            cur.execute("SELECT COUNT(*) FROM GUEST")
             num_guests = cur.fetchone()[0]
 
-            # 2. Tempahan yang belum disahkan
-            cur.execute("SELECT COUNT(*) FROM Booking WHERE STATUS = 'Menunggu Pengesahan'")
+            cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
             num_pending_bookings = cur.fetchone()[0]
 
-            # 3. Bil belum dibayar - COMMENT/REPLACE sebab tiada STATUS dalam Bill
-            # cur.execute("SELECT COUNT(*) FROM Bill WHERE STATUS = 'Belum Dibayar'")
-            # num_unpaid_bills = cur.fetchone()[0]
-            num_unpaid_bills = 0  # atau tambah column baru jika nak guna
+            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
+            num_unpaid_bills = cur.fetchone()[0]
 
-            cur.close()
+            # print("DEBUG: Guests =", num_guests)
+            # print("DEBUG: Pending bookings =", num_pending_bookings)
+            # print("DEBUG: Unpaid bills =", num_unpaid_bills)
 
-            return render_template('/admin/admin_dashboard.html',
-                                   num_guests=num_guests,
-                                   num_pending_bookings=num_pending_bookings,
-                                   num_unpaid_bills=num_unpaid_bills)
+            return render_template(
+                'admin/admin_dashboard.html',
+                num_guests=num_guests,
+                num_pending_bookings=num_pending_bookings,
+                num_unpaid_bills=num_unpaid_bills
+            )
 
         except Exception as e:
-            print("Dashboard Error:", e)
-            flash("Ralat ketika mengambil data dari pangkalan data.", "danger")
-            return redirect(url_for('index'))
+            flash(f"Ralat dashboard: {str(e)}", "danger")
+        finally:
+            cur.close()
+            conn.close()
 
-    flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
+    flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
 
 
@@ -652,6 +666,72 @@ def admin_guest_management():
             conn.close()
     flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
+
+@app.route('/admin/kemaskini-tetamu/<int:guest_id>', methods=['GET', 'POST'])
+def kemaskini_tetamu(guest_id):
+    if 'logged_in' in session and session['role'] == 'admin':
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        if request.method == 'POST':
+            try:
+                fullname = request.form.get('fullname')
+                email = request.form.get('email')
+                phone = request.form.get('phone')
+                username = request.form.get('username')
+
+                cur.execute("""
+                    UPDATE GUEST 
+                    SET FULLNAME=:1, EMAIL=:2, PHONENO=:3, USERNAME=:4 
+                    WHERE GUESTID=:5
+                """, (fullname, email, phone, username, guest_id))
+                conn.commit()
+                flash("Butiran tetamu berjaya dikemaskini!", "success")
+                return redirect(url_for('admin_guest_management'))
+            except Exception as e:
+                flash(f"Ralat semasa mengemaskini: {e}", "danger")
+                return redirect(url_for('admin_guest_management'))
+            finally:
+                cur.close()
+                conn.close()
+
+        else:  # GET
+            try:
+                cur.execute("SELECT * FROM GUEST WHERE GUESTID = :1", (guest_id,))
+                guest = cur.fetchone()
+                if guest:
+                    return render_template('admin/edit_guest.html', guest=guest)
+                else:
+                    flash("Tetamu tidak dijumpai.", "warning")
+                    return redirect(url_for('admin_guest_management'))
+            finally:
+                cur.close()
+                conn.close()
+    else:
+        flash("Sila log masuk sebagai admin.", "warning")
+        return redirect(url_for('index'))
+
+
+@app.route('/admin/padam-tetamu/<int:guest_id>', methods=['POST'])
+def padam_tetamu(guest_id):
+    if 'logged_in' in session and session['role'] == 'admin':
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM GUEST WHERE GUESTID = :1", (guest_id,))
+            conn.commit()
+            flash("Tetamu berjaya dipadam.", "success")
+        except Exception as e:
+            conn.rollback()
+            flash(f"Ralat semasa memadam tetamu: {e}", "danger")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for('admin_guest_management'))
+
+    flash("Sila log masuk sebagai admin.", "warning")
+    return redirect(url_for('index'))
+
 
 
 
@@ -677,6 +757,102 @@ def admin_admin_management():
     flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
 
+
+@app.route('/admin/tambah_admin')
+def show_add_admin_form():
+    if 'logged_in' in session and session['role'] == 'admin':
+        return render_template(
+            'admin/admin_form.html',
+            mode='Daftar',
+            action_url=url_for('add_admin'),
+            admin=None
+        )
+    flash("Sila log masuk sebagai admin.", "warning")
+    return redirect(url_for('index'))
+
+
+@app.route('/admin/tambah_admin', methods=['POST'])
+def add_admin():
+    if 'logged_in' in session and session['role'] == 'admin':
+        username = request.form['username']
+        password = request.form['password']
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO ADMIN (USERNAME, PASSWORD) VALUES (:1, :2)", (username, password))
+            conn.commit()
+            flash("Admin berjaya ditambah!", "success")
+        except Exception as e:
+            flash("Ralat tambah admin: " + str(e), "danger")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for('admin_admin_management'))
+    flash("Sila log masuk sebagai admin.", "warning")
+    return redirect(url_for('index'))
+
+@app.route('/admin/kemaskini_admin/<int:admin_id>')
+def edit_admin(admin_id):
+    if 'logged_in' in session and session['role'] == 'admin':
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT ADMINID, USERNAME FROM ADMIN WHERE ADMINID = :1", (admin_id,))
+            row = cur.fetchone()
+            if row:
+                admin = {'id': row[0], 'username': row[1]}
+                return render_template(
+                    'admin/admin_form.html',
+                    mode='Kemaskini',
+                    action_url=url_for('update_admin', admin_id=admin_id),
+                    admin=admin
+                )
+            else:
+                flash("Admin tidak dijumpai.", "warning")
+        except Exception as e:
+            flash("Ralat: " + str(e), "danger")
+        finally:
+            cur.close()
+            conn.close()
+    return redirect(url_for('index'))
+
+
+@app.route('/admin/kemaskini_admin/<int:admin_id>', methods=['POST'])
+def update_admin(admin_id):
+    if 'logged_in' in session and session['role'] == 'admin':
+        username = request.form['username']
+        password = request.form['password']
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE ADMIN SET USERNAME = :1, PASSWORD = :2 WHERE ADMINID = :3", (username, password, admin_id))
+            conn.commit()
+            flash("Admin dikemaskini.", "success")
+        except Exception as e:
+            flash("Ralat kemaskini: " + str(e), "danger")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for('admin_admin_management'))
+    return redirect(url_for('index'))
+
+@app.route('/admin/delete_admin', methods=['POST'])
+def delete_admin():
+    if 'logged_in' in session and session['role'] == 'admin':
+        admin_id = request.form['admin_id']
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM ADMIN WHERE ADMINID = :1", (admin_id,))
+            conn.commit()
+            flash("Admin dipadam.", "success")
+        except Exception as e:
+            flash("Ralat padam admin: " + str(e), "danger")
+        finally:
+            cur.close()
+            conn.close()
+        return redirect(url_for('admin_admin_management'))
+    return redirect(url_for('index'))
 
 
 @app.route('/admin/admin_booking_management') 
@@ -735,127 +911,209 @@ def admin_booking_management():
 @app.route('/sahkan-tempahan/<booking_id>')
 def confirm_booking(booking_id):
     if 'logged_in' in session and session['role'] == 'admin':
-        for booking in bookings_db:
-            if booking['booking_id'] == booking_id:
-                booking['status'] = 'Disahkan'
-                flash(f"Tempahan {booking_id} telah disahkan.", "success")
-                break
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # 1. Update status tempahan
+            cur.execute("""
+                UPDATE BOOKING SET STATUS = 'Disahkan' WHERE BOOKINGID = :1
+            """, (booking_id,))
+
+            # 2. Dapatkan details tempahan
+            cur.execute("""
+                SELECT CHECKINDATE, CHECKOUTDATE, TOTALPRICE 
+                FROM BOOKING WHERE BOOKINGID = :1
+            """, (booking_id,))
+            booking = cur.fetchone()
+
+            if not booking:
+                flash("Tempahan tidak dijumpai untuk jana bil.", "danger")
+                return redirect(url_for('admin_booking_management'))
+
+            checkin = booking[0]
+            checkout = booking[1]
+            total_amount = booking[2]  # ✅ Gunakan terus TOTALPRICE
+
+            # 3. Insert ke dalam BILL jika belum wujud
+            cur.execute("SELECT * FROM BILL WHERE BOOKINGID = :1", (booking_id,))
+            existing_bill = cur.fetchone()
+
+            if not existing_bill:
+                cur.execute("""
+                    INSERT INTO BILL (BOOKINGID, AMOUNT, ISSUEDDATE, STATUS)
+                    VALUES (:1, :2, SYSDATE, 'Belum Dibayar')
+                """, (booking_id, total_amount))
+
+            conn.commit()
+            flash(f"Tempahan {booking_id} disahkan dan bil telah dijana (RM{total_amount:.2f}).", "success")
+
+        except Exception as e:
+            flash(f"Ralat semasa pengesahan: {str(e)}", "danger")
+
+        finally:
+            cur.close()
+            conn.close()
+
         return redirect(url_for('admin_booking_management'))
-    flash("Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.", "danger")
+
+    flash("Anda tidak mempunyai kebenaran untuk tindakan ini.", "danger")
     return redirect(url_for('index'))
+
+
 
 @app.route('/batalkan-tempahan/<booking_id>')
 def cancel_booking(booking_id):
     if 'logged_in' in session and session['role'] == 'admin':
-        for booking in bookings_db:
-            if booking['booking_id'] == booking_id:
-                booking['status'] = 'Dibatalkan'
-                flash(f"Tempahan {booking_id} telah dibatalkan.", "info")
-                break
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # Update status ke 'Dibatalkan'
+            cur.execute("""
+                UPDATE BOOKING SET STATUS = 'Dibatalkan' WHERE BOOKINGID = :1
+            """, (booking_id,))
+
+            conn.commit()
+            flash(f"Tempahan {booking_id} telah dibatalkan.", "info")
+
+        except Exception as e:
+            flash(f"Ralat semasa membatalkan: {str(e)}", "danger")
+
+        finally:
+            cur.close()
+            conn.close()
+
         return redirect(url_for('admin_booking_management'))
+
     flash("Anda tidak mempunyai kebenaran untuk melakukan tindakan ini.", "danger")
     return redirect(url_for('index'))
 
-@app.route('/admin/admin_bill_management', methods=['GET', 'POST'])
-def admin_bill_management():
-    print("DEBUG: Session inside /admin/admin_bill_management →", session)
 
+@app.route('/admin/admin_bill_management')
+def admin_bill_management():
     if 'logged_in' in session and session['role'] == 'admin':
         try:
             conn = get_db_connection()
             cur = conn.cursor()
 
-            # Kemaskini status bil jika POST
-            if request.method == 'POST' and 'bill_id' in request.form:
-                bill_id = request.form['bill_id']
-                new_status = request.form['status']
-                cur.execute("UPDATE BILL SET STATUS = :1 WHERE BILLID = :2", (new_status, bill_id))
-                conn.commit()
-                flash("Status bil dikemaskini!", "success")
-
-            # Dapatkan filter dari query string
-            status_filter = request.args.get('status', 'Semua')
-            booking_id_search = request.args.get('booking_id', '')
-
-            # SQL dengan JOIN
-            query = """
-                SELECT B.BILLID, B.BOOKINGID, B.AMOUNT, B.ISSUEDDATE, B.STATUS, G.FULLNAME
-                FROM BILL B
-                LEFT JOIN BOOKING BK ON B.BOOKINGID = BK.BOOKINGID
-                LEFT JOIN GUEST G ON BK.GUESTID = G.GUESTID
-                WHERE 1=1
-            """
-            params = {}
-
-            if status_filter and status_filter != 'Semua':
-                query += " AND B.STATUS = :status"
-                params['status'] = status_filter
-
-            if booking_id_search:
-                query += " AND B.BOOKINGID = :booking_id"
-                params['booking_id'] = booking_id_search
-
-            query += " ORDER BY B.ISSUEDDATE DESC"
-
-            cur.execute(query, params)
+            cur.execute("""
+                SELECT 
+                    B.BILLID, 
+                    B.BOOKINGID, 
+                    G.FULLNAME,
+                    B.AMOUNT, 
+                    TO_CHAR(B.ISSUEDDATE, 'DD-MM-YYYY'), 
+                    B.STATUS
+                FROM 
+                    BILL B
+                JOIN 
+                    BOOKING BK ON B.BOOKINGID = BK.BOOKINGID
+                JOIN 
+                    GUEST G ON BK.GUESTID = G.GUESTID
+                ORDER BY B.ISSUEDDATE DESC
+            """)
             bills = cur.fetchall()
 
-            cur.close()
-            conn.close()
-
-            return render_template('admin/admin_bill_management.html',
-                                   bills=bills,
-                                   selected_status=status_filter,
-                                   search_booking_id=booking_id_search)
+            return render_template('admin/admin_bill_management.html', bills=bills)
 
         except Exception as e:
             flash("Ralat semasa akses bil: " + str(e), "danger")
-            return redirect(url_for('admin_dashboard'))
 
-    flash("Sila log masuk sebagai admin.", "warning")
+        finally:
+            cur.close()
+            conn.close()
+
+    flash("Sila log masuk sebagai admin untuk akses halaman ini.", "warning")
     return redirect(url_for('index'))
 
-@app.route('/admin/kemaskini-tetamu/<int:guest_id>', methods=['GET', 'POST'])
-def kemaskini_tetamu(guest_id):
+@app.route('/tandakan-dibayar/<bill_id>')
+def mark_bill_paid_get(bill_id):
     if 'logged_in' in session and session['role'] == 'admin':
         try:
             conn = get_db_connection()
             cur = conn.cursor()
 
-            if request.method == 'POST':
-                fullname = request.form['fullname']
-                email = request.form['email']
-                phone = request.form['phone']
-                username = request.form['username']
+            cur.execute("""
+                UPDATE BILL SET STATUS = 'Dibayar' WHERE BILLID = :1
+            """, (bill_id,))
+            conn.commit()
+            flash(f"Bil #{bill_id} telah ditandakan sebagai 'Dibayar'.", "success")
 
-                cur.execute("""
-                    UPDATE GUEST 
-                    SET FULLNAME = :1, EMAIL = :2, PHONE = :3, USERNAME = :4 
-                    WHERE GUESTID = :5
-                """, (fullname, email, phone, username, guest_id))
-                conn.commit()
-                flash("Maklumat tetamu dikemaskini!", "success")
-                return redirect(url_for('admin_guest_management'))
+        except Exception as e:
+            flash("Ralat semasa mengemaskini bil: " + str(e), "danger")
 
-            # Dapatkan maklumat tetamu untuk pre-fill form
-            cur.execute("SELECT FULLNAME, EMAIL, PHONE, USERNAME FROM GUEST WHERE GUESTID = :1", (guest_id,))
-            guest = cur.fetchone()
-
+        finally:
             cur.close()
             conn.close()
 
-            if guest:
-                return render_template('kemaskini_tetamu.html', guest=guest, guest_id=guest_id)
-            else:
-                flash("Tetamu tidak dijumpai.", "warning")
-                return redirect(url_for('admin_guest_management'))
+        return redirect(url_for('admin_bill_management'))
+
+    flash("Akses tidak dibenarkan.", "danger")
+    return redirect(url_for('index'))
+
+@app.route('/admin/tandakan-bil-dibayar', methods=['POST'])
+def mark_bill_as_paid():
+    if 'logged_in' in session and session['role'] == 'admin':
+        bill_id = request.form.get('bill_id')
+
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            cur.execute("UPDATE BILL SET STATUS = 'Telah Dibayar' WHERE BILLID = :1", (bill_id,))
+            conn.commit()
+            flash(f"Bil #{bill_id} telah ditandakan sebagai 'Telah Dibayar'.", "success")
 
         except Exception as e:
-            flash("Ralat semasa kemaskini: " + str(e), "danger")
-            return redirect(url_for('admin_guest_management'))
+            flash(f"Ralat ketika menandakan bil: {str(e)}", "danger")
+        finally:
+            cur.close()
+            conn.close()
+
+        return redirect(url_for('admin_bill_management'))
+
+    flash("Sila log masuk sebagai admin untuk akses.", "warning")
+    return redirect(url_for('index'))
+
+@app.route('/lihat-bil/<int:bill_id>', methods=['POST'])
+def view_bill(bill_id):
+    if 'logged_in' in session and session['role'] == 'admin':
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT 
+                    B.BILLID,
+                    B.BOOKINGID,
+                    G.FULLNAME,
+                    B.AMOUNT,
+                    TO_CHAR(B.ISSUEDDATE, 'DD-MM-YYYY'),
+                    B.STATUS
+                FROM BILL B
+                JOIN BOOKING BK ON B.BOOKINGID = BK.BOOKINGID
+                JOIN GUEST G ON BK.GUESTID = G.GUESTID
+                WHERE B.BILLID = :1
+            """, (bill_id,))
+            bill = cur.fetchone()
+
+            if bill:
+                return render_template('admin/view_single_bill.html', bill=bill)
+            else:
+                flash("Bil tidak dijumpai.", "danger")
+                return redirect(url_for('admin_bill_management'))
+
+        except Exception as e:
+            flash(f"Ralat: {str(e)}", "danger")
+        finally:
+            cur.close()
+            conn.close()
 
     flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
+
+
 
 # Route for displaying the form to add a new guest
 @app.route('/tambah-tetamu-manual', methods=['GET', 'POST'])
