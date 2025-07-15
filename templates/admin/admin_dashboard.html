@@ -211,18 +211,16 @@
       }
     }
   });
-
-  const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
-  new Chart(ctxEarnings, {
-    type: 'line',
+const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
+new Chart(ctxEarnings, {
+    type: 'bar',
     data: {
       labels: {{ tarikh_list | tojson }},
       datasets: [{
         label: 'Jumlah Tempahan',
         data: {{ jumlah_tempahan_list | tojson }},
-        borderColor: '#6a11cb',
-        backgroundColor: 'rgba(106, 17, 203, 0.2)',
-        tension: 0.4
+        backgroundColor: '#6a11cb',
+        borderRadius: 8
       }]
     },
     options: {
@@ -240,7 +238,8 @@
         }
       }
     }
-  });
+});
+
 </script>
 
 
