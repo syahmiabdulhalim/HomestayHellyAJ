@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Admin - Homestay Helly AJ</title>
   <style>
@@ -14,7 +13,6 @@
       margin: 0;
       padding: 0;
     }
-
     .header {
       background-color: #6a11cb;
       background-image: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
@@ -26,7 +24,6 @@
       position: relative;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
-
     .logout-button {
       position: absolute;
       top: 20px;
@@ -41,18 +38,15 @@
       font-weight: 600;
       transition: background-color 0.3s ease;
     }
-
     .logout-button:hover {
       background-color: #e60039;
     }
-
     .nav {
       background-color: #ffffff;
       padding: 15px 0;
       text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
-
     .nav a {
       margin: 0 18px;
       text-decoration: none;
@@ -61,24 +55,20 @@
       font-size: 16px;
       transition: color 0.3s ease;
     }
-
     .nav a:hover {
       color: #6a11cb;
     }
-
     .container {
       padding: 40px 20px;
       max-width: 1000px;
       margin: 0 auto;
     }
-
     .flashcards {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       justify-content: center;
     }
-
     .card {
       flex: 1 1 280px;
       background-color: white;
@@ -88,30 +78,25 @@
       text-align: center;
       transition: transform 0.3s ease;
     }
-
     .card:hover {
       transform: translateY(-5px);
     }
-
     .card h3 {
       color: #6a11cb;
       margin-bottom: 10px;
       font-size: 20px;
     }
-
     .card p {
       font-size: 28px;
       font-weight: bold;
       color: #343a40;
       margin: 0;
     }
-
     canvas {
       max-width: 500px;
       margin: 40px auto;
       display: block;
     }
-
     @media (max-width: 768px) {
       .card {
         flex: 1 1 100%;
@@ -124,14 +109,12 @@
     Dashboard Admin - Homestay Helly AJ
     <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
   </div>
-
   <div class="nav">
     <a href="/admin/admin_guest_management">Pengurusan Tetamu</a>
     <a href="/admin/admin_admin_management">Pengurusan Admin</a>
     <a href="/admin/admin_booking_management">Pengurusan Tempahan</a>
     <a href="/admin/admin_bill_management">Pengurusan Bil</a>
   </div>
-
   <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -142,7 +125,6 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-
     <div class="flashcards">
       <div class="card">
         <h3>👤 Jumlah Tetamu Berdaftar</h3>
@@ -157,12 +139,10 @@
         <p>{{ num_unpaid_bills }}</p>
       </div>
     </div>
-
     <canvas id="dashboardChart"></canvas>
+    <canvas id="billStatusChart"></canvas>
   </div>
-
   <script>
-    // Auto-hide alert selepas 3 saat
     setTimeout(function() {
       let alerts = document.querySelectorAll('.alert');
       alerts.forEach(function(alert) {
@@ -172,9 +152,8 @@
       });
     }, 3000);
 
-    // Chart.js Pie Chart
     const ctx = document.getElementById('dashboardChart').getContext('2d');
-    const dashboardChart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'pie',
       data: {
         labels: ['Tetamu Berdaftar', 'Tempahan Menunggu', 'Bil Tertunggak'],
@@ -196,6 +175,33 @@
                 weight: '600'
               }
             }
+          }
+        }
+      }
+    });
+
+    const ctxBill = document.getElementById('billStatusChart').getContext('2d');
+    new Chart(ctxBill, {
+      type: 'bar',
+      data: {
+        labels: ['Bil Telah Dibayar', 'Bil Belum Dibayar'],
+        datasets: [{
+          label: 'Jumlah Bil',
+          data: [{{ num_bills_paid }}, {{ num_bills_unpaid }}],
+          backgroundColor: ['#28a745', '#dc3545'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Status Bil' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
           }
         }
       }
