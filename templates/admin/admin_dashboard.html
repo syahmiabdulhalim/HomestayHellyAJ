@@ -143,103 +143,53 @@
     <canvas id="billStatusChart"></canvas>
     <canvas id="monthlyEarningsChart"></canvas>
   </div>
-  <script>
-  setTimeout(function() {
-    let alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-      alert.style.transition = 'opacity 0.5s ease-out';
-      alert.style.opacity = '0';
-      setTimeout(() => alert.remove(), 500);
+<script>
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Tetamu Berdaftar', 'Tempahan Menunggu', 'Bil Tertunggak'],
+            datasets: [{
+                data: [{{ num_guests|default(0) }}, {{ num_pending_bookings|default(0) }}, {{ num_unpaid_bills|default(0) }}],
+                backgroundColor: ['#6a11cb', '#2575fc', '#ff4d6d'],
+                borderWidth: 0
+            }]
+        }
     });
-  }, 3000);
 
-  const ctx = document.getElementById('dashboardChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: ['Tetamu Berdaftar', 'Tempahan Menunggu', 'Bil Tertunggak'],
-      datasets: [{
-        data: [
-          {{ num_guests | tojson }},
-          {{ num_pending_bookings | tojson }},
-          {{ num_unpaid_bills | tojson }}
-        ],
-        backgroundColor: ['#6a11cb', '#2575fc', '#ff4d6d'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#333',
-            font: { size: 14, weight: '600' }
-          }
+    const ctxBill = document.getElementById('billStatusChart').getContext('2d');
+    new Chart(ctxBill, {
+        type: 'bar',
+        data: {
+            labels: ['Bil Telah Dibayar', 'Bil Belum Dibayar'],
+            datasets: [{
+                label: 'Jumlah Bil',
+                data: [{{ num_bills_paid|default(0) }}, {{ num_bills_unpaid|default(0) }}],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
         }
-      }
-    }
-  });
+    });
 
-  const ctxBill = document.getElementById('billStatusChart').getContext('2d');
-  new Chart(ctxBill, {
-    type: 'bar',
-    data: {
-      labels: ['Bil Telah Dibayar', 'Bil Belum Dibayar'],
-      datasets: [{
-        label: 'Jumlah Bil',
-        data: [
-          {{ num_bills_paid | tojson }},
-          {{ num_bills_unpaid | tojson }}
-        ],
-        backgroundColor: ['#28a745', '#dc3545'],
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Status Bil' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { precision: 0 }
+    const bulanLabels = {{ bulan_list|tojson }};
+    const jumlahData = {{ jumlah_list|tojson }};
+    
+    const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
+    new Chart(ctxEarnings, {
+        type: 'line',
+        data: {
+            labels: bulanLabels,
+            datasets: [{
+                label: 'Jumlah Untung (RM)',
+                data: jumlahData,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
         }
-      }
-    }
-  });
-
-  const bulanLabels = {{ bulan_list | tojson }};
-  const jumlahData = {{ jumlah_list | tojson }};
-  const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
-  new Chart(ctxEarnings, {
-    type: 'line',
-    data: {
-      labels: bulanLabels,
-      datasets: [{
-        label: 'Jumlah Untung (RM)',
-        data: jumlahData,
-        borderColor: '#28a745',
-        backgroundColor: 'rgba(40, 167, 69, 0.2)',
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: { display: true, text: 'Untung Per Bulan' },
-        legend: { display: false }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
+    });
 </script>
+
 
 </body>
 </html>
