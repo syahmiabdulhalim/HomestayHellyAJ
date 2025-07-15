@@ -141,6 +141,7 @@
     </div>
     <canvas id="dashboardChart"></canvas>
     <canvas id="billStatusChart"></canvas>
+    <canvas id="monthlyEarningsChart"></canvas>
   </div>
   <script>
     setTimeout(function() {
@@ -202,6 +203,36 @@
           y: {
             beginAtZero: true,
             ticks: { precision: 0 }
+          }
+        }
+      }
+    });
+
+    const bulanLabels = {{ bulan_list|tojson }};
+    const jumlahData = {{ jumlah_list|tojson }};
+    const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
+    new Chart(ctxEarnings, {
+      type: 'line',
+      data: {
+        labels: bulanLabels,
+        datasets: [{
+          label: 'Jumlah Untung (RM)',
+          data: jumlahData,
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.2)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Untung Per Bulan' },
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
           }
         }
       }

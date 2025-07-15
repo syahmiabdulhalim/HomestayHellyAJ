@@ -616,8 +616,6 @@ def guest_profile():
     return redirect(url_for('index'))
 
 
-
-
 @app.route('/admin/admin_dashboard')
 def admin_dashboard():
     if 'logged_in' in session and session['role'] == 'admin':
@@ -641,13 +639,28 @@ def admin_dashboard():
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_bills_unpaid = cur.fetchone()[0]
 
+            # Tambah untuk kira jumlah untung per bulan
+            cur.execute("""
+                SELECT TO_CHAR(ISSUEDDATE, 'Month') AS bulan, SUM(AMOUNT) AS jumlah
+                FROM BILL
+                WHERE STATUS = 'Telah Dibayar'
+                GROUP BY TO_CHAR(ISSUEDDATE, 'Month'), EXTRACT(MONTH FROM ISSUEDDATE)
+                ORDER BY EXTRACT(MONTH FROM ISSUEDDATE)
+            """)
+            result = cur.fetchall()
+
+            bulan_list = [row[0].strip() for row in result]
+            jumlah_list = [float(row[1]) for row in result]
+
             return render_template(
                 'admin/admin_dashboard.html',
                 num_guests=num_guests,
                 num_pending_bookings=num_pending_bookings,
                 num_unpaid_bills=num_unpaid_bills,
                 num_bills_paid=num_bills_paid,
-                num_bills_unpaid=num_bills_unpaid
+                num_bills_unpaid=num_bills_unpaid,
+                bulan_list=bulan_list,
+                jumlah_list=jumlah_list
             )
 
         except Exception as e:
