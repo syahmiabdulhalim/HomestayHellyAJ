@@ -620,23 +620,18 @@ def admin_dashboard():
             conn = get_db_connection()
             cur = conn.cursor()
 
-            # Kiraan jumlah tetamu
             cur.execute("SELECT COUNT(*) FROM GUEST")
-            num_guests = cur.fetchone()[0]
+            num_guests = cur.fetchone()[0] or 0
 
-            # Kiraan jumlah tempahan menunggu pengesahan
             cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
-            num_pending_bookings = cur.fetchone()[0]
+            num_pending_bookings = cur.fetchone()[0] or 0
 
-            # Kiraan bil belum dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
-            num_bills_unpaid = cur.fetchone()[0]
+            num_bills_unpaid = cur.fetchone()[0] or 0
 
-            # Kiraan bil telah dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
-            num_bills_paid = cur.fetchone()[0]
+            num_bills_paid = cur.fetchone()[0] or 0
 
-            # Kiraan jumlah tempahan mengikut tarikh check-in (untuk bar chart)
             cur.execute("""
                 SELECT TO_CHAR(check_in_date, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah_tempahan
                 FROM BOOKING
@@ -647,6 +642,11 @@ def admin_dashboard():
 
             tarikh_list = [row[0] for row in result] if result else []
             jumlah_tempahan_list = [row[1] for row in result] if result else []
+
+            # Jika kosong, bagi default untuk elakkan Chart.js error
+            if not tarikh_list:
+                tarikh_list = ["Tiada Data"]
+                jumlah_tempahan_list = [0]
 
             return render_template(
                 'admin/admin_dashboard.html',
