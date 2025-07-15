@@ -620,33 +620,33 @@ def admin_dashboard():
             conn = get_db_connection()
             cur = conn.cursor()
 
+            # Jumlah tetamu
             cur.execute("SELECT COUNT(*) FROM GUEST")
             num_guests = cur.fetchone()[0] or 0
 
+            # Tempahan menunggu pengesahan
             cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
             num_pending_bookings = cur.fetchone()[0] or 0
 
+            # Bil belum dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_bills_unpaid = cur.fetchone()[0] or 0
 
+            # Bil telah dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0] or 0
 
+            # Chart: Jumlah tempahan mengikut tarikh check-in
             cur.execute("""
-                SELECT TO_CHAR(check_in_date, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah_tempahan
+                SELECT TO_CHAR(check_in, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah_tempahan
                 FROM BOOKING
-                GROUP BY TO_CHAR(check_in_date, 'YYYY-MM-DD')
+                GROUP BY TO_CHAR(check_in, 'YYYY-MM-DD')
                 ORDER BY tarikh
             """)
             result = cur.fetchall()
 
-            tarikh_list = [row[0] for row in result] if result else []
-            jumlah_tempahan_list = [row[1] for row in result] if result else []
-
-            # Jika kosong, bagi default untuk elakkan Chart.js error
-            if not tarikh_list:
-                tarikh_list = ["Tiada Data"]
-                jumlah_tempahan_list = [0]
+            tarikh_list = [row[0] for row in result] if result else ["Tiada Data"]
+            jumlah_tempahan_list = [row[1] for row in result] if result else [0]
 
             return render_template(
                 'admin/admin_dashboard.html',
@@ -654,7 +654,6 @@ def admin_dashboard():
                 num_pending_bookings=num_pending_bookings,
                 num_unpaid_bills=num_bills_unpaid,
                 num_bills_paid=num_bills_paid,
-                num_bills_unpaid=num_bills_unpaid,
                 tarikh_list=tarikh_list,
                 jumlah_tempahan_list=jumlah_tempahan_list
             )
@@ -666,7 +665,6 @@ def admin_dashboard():
         finally:
             cur.close()
             conn.close()
-
     else:
         flash("Sila log masuk sebagai admin.", "warning")
         return redirect(url_for('index'))

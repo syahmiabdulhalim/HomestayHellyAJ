@@ -206,34 +206,35 @@
       }
     });
 
-    const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
-    new Chart(ctxEarnings, {
-      type: 'bar',
-      data: {
+   const checkinCtx = document.getElementById('checkinChart').getContext('2d');
+new Chart(checkinCtx, {
+    type: 'bar',
+    data: {
         labels: {{ tarikh_list | tojson }},
         datasets: [{
-          label: 'Jumlah Tempahan',
-          data: {{ jumlah_tempahan_list | tojson }},
-          backgroundColor: '#6a11cb',
-          borderRadius: 8
+            label: 'Bilangan Check-in',
+            data: {{ jumlah_checkin_list | tojson }},
+            backgroundColor: '#6a11cb',
+            borderRadius: 8
         }]
-      },
-      options: {
+    },
+    options: {
         responsive: true,
         plugins: {
-          title: {
-            display: true,
-            text: 'Jumlah Tempahan Mengikut Tarikh Check-in'
-          }
+            title: {
+                display: true,
+                text: 'Bilangan Check-in Mengikut Tarikh'
+            }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { precision: 0 }
-          }
+            y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+            }
         }
-      }
-    });
+    }
+});
+
   </script>
 </body>
 </html>
