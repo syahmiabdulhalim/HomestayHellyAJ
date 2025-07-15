@@ -617,57 +617,51 @@ def guest_profile():
 @app.route('/admin/admin_dashboard')
 def admin_dashboard():
     if 'logged_in' in session and session['role'] == 'admin':
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-            # Tetamu, tempahan, bil seperti biasa
-            cur.execute("SELECT COUNT(*) FROM GUEST")
-            num_guests = cur.fetchone()[0]
+        # Tetamu
+        cur.execute("SELECT COUNT(*) FROM GUEST")
+        num_guests = cur.fetchone()[0]
 
-            cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
-            num_pending_bookings = cur.fetchone()[0]
+        # Tempahan Menunggu
+        cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
+        num_pending_bookings = cur.fetchone()[0]
 
-            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
-            num_unpaid_bills = cur.fetchone()[0]
+        # Bil
+        cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
+        num_unpaid_bills = cur.fetchone()[0]
 
-            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
-            num_bills_paid = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
+        num_bills_paid = cur.fetchone()[0]
 
-            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
-            num_bills_unpaid = cur.fetchone()[0]
+        # Chart: Jumlah Tempahan Mengikut Tarikh Check-in
+        cur.execute("""
+            SELECT TO_CHAR(check_in_date, 'YYYY-MM-DD') AS tarikh, COUNT(*) 
+            FROM booking
+            GROUP BY TO_CHAR(check_in_date, 'YYYY-MM-DD')
+            ORDER BY tarikh
+        """)
+        result = cur.fetchall()
+        tarikh_list = [row[0] for row in result]
+        jumlah_tempahan_list = [row[1] for row in result]
 
-            # Kiraan tempahan per tarikh check-in:
-            cur.execute("""
-                SELECT DATE(CHECKINDATE) AS tarikh, COUNT(*) AS total
-                FROM BOOKING
-                GROUP BY DATE(CHECKINDATE)
-                ORDER BY DATE(CHECKINDATE)
-            """)
-            result_tempahan = cur.fetchall()
+        cur.close()
+        conn.close()
 
-            tarikh_list = [row[0].strftime('%Y-%m-%d') for row in result_tempahan]
-            jumlah_tempahan_list = [row[1] for row in result_tempahan]
-
-            return render_template(
-                'admin/admin_dashboard.html',
-                num_guests=num_guests,
-                num_pending_bookings=num_pending_bookings,
-                num_unpaid_bills=num_unpaid_bills,
-                num_bills_paid=num_bills_paid,
-                num_bills_unpaid=num_bills_unpaid,
-                tarikh_list=tarikh_list,
-                jumlah_tempahan_list=jumlah_tempahan_list
-            )
-
-        except Exception as e:
-            flash(f"Ralat dashboard: {str(e)}", "danger")
-        finally:
-            cur.close()
-            conn.close()
-
-    flash("Sila log masuk sebagai admin.", "warning")
-    return redirect(url_for('index'))
+        return render_template(
+            'admin/admin_dashboard.html',
+            num_guests=num_guests,
+            num_pending_bookings=num_pending_bookings,
+            num_unpaid_bills=num_unpaid_bills,
+            num_bills_paid=num_bills_paid,
+            num_bills_unpaid=num_unpaid_bills,  # boleh samakan
+            tarikh_list=tarikh_list,
+            jumlah_tempahan_list=jumlah_tempahan_list
+        )
+    else:
+        flash("Sila log masuk sebagai admin.", "warning")
+        return redirect(url_for('index'))
 
 
 
