@@ -634,15 +634,20 @@ def admin_dashboard():
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_unpaid_bills = cur.fetchone()[0]
 
-            # print("DEBUG: Guests =", num_guests)
-            # print("DEBUG: Pending bookings =", num_pending_bookings)
-            # print("DEBUG: Unpaid bills =", num_unpaid_bills)
+            # Tambah kiraan untuk bill telah dibayar dan belum dibayar
+            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
+            num_bills_paid = cur.fetchone()[0]
+
+            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
+            num_bills_unpaid = cur.fetchone()[0]
 
             return render_template(
                 'admin/admin_dashboard.html',
                 num_guests=num_guests,
                 num_pending_bookings=num_pending_bookings,
-                num_unpaid_bills=num_unpaid_bills
+                num_unpaid_bills=num_unpaid_bills,
+                num_bills_paid=num_bills_paid,
+                num_bills_unpaid=num_bills_unpaid
             )
 
         except Exception as e:
