@@ -614,8 +614,6 @@ def guest_profile():
 
     flash("Sila log masuk sebagai tetamu untuk mengakses halaman ini.", "warning")
     return redirect(url_for('index'))
-
-
 @app.route('/admin/admin_dashboard')
 def admin_dashboard():
     if 'logged_in' in session and session['role'] == 'admin':
@@ -623,23 +621,27 @@ def admin_dashboard():
             conn = get_db_connection()
             cur = conn.cursor()
 
+            # Jumlah tetamu
             cur.execute("SELECT COUNT(*) FROM GUEST")
             num_guests = cur.fetchone()[0]
 
+            # Tempahan menunggu pengesahan
             cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
             num_pending_bookings = cur.fetchone()[0]
 
+            # Bil belum dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_unpaid_bills = cur.fetchone()[0]
 
-            # Tambah kiraan untuk bill telah dibayar dan belum dibayar
+            # Bil telah dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0]
 
+            # Bil belum dibayar (kira semula supaya pasti sama)
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_bills_unpaid = cur.fetchone()[0]
 
-            # Tambah untuk kira jumlah untung per bulan
+            # Kiraan jumlah untung per bulan
             cur.execute("""
                 SELECT TO_CHAR(ISSUEDDATE, 'Month') AS bulan, SUM(AMOUNT) AS jumlah
                 FROM BILL
@@ -648,7 +650,6 @@ def admin_dashboard():
                 ORDER BY EXTRACT(MONTH FROM ISSUEDDATE)
             """)
             result = cur.fetchall()
-
             bulan_list = [row[0].strip() for row in result]
             jumlah_list = [float(row[1]) for row in result]
 
