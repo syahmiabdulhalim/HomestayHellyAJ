@@ -636,9 +636,9 @@ def admin_dashboard():
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0] or 0
 
-            # Chart: Jumlah tempahan mengikut tarikh check-in
+            # Chart: Jumlah check-in ikut tarikh
             cur.execute("""
-                SELECT TO_CHAR(check_in, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah_tempahan
+                SELECT TO_CHAR(check_in, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah
                 FROM BOOKING
                 GROUP BY TO_CHAR(check_in, 'YYYY-MM-DD')
                 ORDER BY tarikh
@@ -646,16 +646,16 @@ def admin_dashboard():
             result = cur.fetchall()
 
             tarikh_list = [row[0] for row in result] if result else ["Tiada Data"]
-            jumlah_tempahan_list = [row[1] for row in result] if result else [0]
+            jumlah_checkin_list = [row[1] for row in result] if result else [0]
 
             return render_template(
                 'admin/admin_dashboard.html',
                 num_guests=num_guests,
                 num_pending_bookings=num_pending_bookings,
-                num_unpaid_bills=num_bills_unpaid,
+                num_bills_unpaid=num_bills_unpaid,
                 num_bills_paid=num_bills_paid,
                 tarikh_list=tarikh_list,
-                jumlah_tempahan_list=jumlah_tempahan_list
+                jumlah_checkin_list=jumlah_checkin_list
             )
 
         except Exception as e:
@@ -665,27 +665,11 @@ def admin_dashboard():
         finally:
             cur.close()
             conn.close()
+
     else:
         flash("Sila log masuk sebagai admin.", "warning")
         return redirect(url_for('index'))
 
-@app.route('/admin/admin_guest_management')
-def admin_guest_management():
-    if 'logged_in' in session and session['role'] == 'admin':
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT GUESTID, FULLNAME, EMAIL, PHONENO, USERNAME FROM GUEST")
-            guest = cur.fetchall()
-            return render_template('admin/admin_guest_management.html', guest=guest)
-        except Exception as e:
-            flash(f"Ralat semasa akses tetamu: {e}", "danger")
-            return redirect(url_for('admin_dashboard'))
-        finally:
-            cur.close()
-            conn.close()
-    flash("Sila log masuk sebagai admin untuk mengakses halaman ini.", "warning")
-    return redirect(url_for('index'))
 
 @app.route('/admin/kemaskini-tetamu/<int:guest_id>', methods=['GET', 'POST'])
 def kemaskini_tetamu(guest_id):
@@ -964,6 +948,7 @@ def admin_booking_management():
 
             # Join table GUESTS dan BOOKING
             cur.execute("""
+                    
                 SELECT 
                     B.BOOKINGID, 
                     G.FULLNAME, 
