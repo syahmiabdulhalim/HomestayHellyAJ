@@ -637,10 +637,6 @@ def admin_dashboard():
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0]
 
-            # Bil belum dibayar (kira semula supaya pasti sama)
-            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
-            num_bills_unpaid = cur.fetchone()[0]
-
             # Kiraan jumlah untung per bulan
             cur.execute("""
                 SELECT TO_CHAR(ISSUEDDATE, 'Month') AS bulan, SUM(AMOUNT) AS jumlah
@@ -649,9 +645,20 @@ def admin_dashboard():
                 GROUP BY TO_CHAR(ISSUEDDATE, 'Month'), EXTRACT(MONTH FROM ISSUEDDATE)
                 ORDER BY EXTRACT(MONTH FROM ISSUEDDATE)
             """)
-            result = cur.fetchall()
-            bulan_list = [row[0].strip() for row in result]
-            jumlah_list = [float(row[1]) for row in result]
+            result_bulan = cur.fetchall()
+            bulan_list = [row[0].strip() for row in result_bulan]
+            jumlah_list = [float(row[1]) for row in result_bulan]
+
+            # Jumlah tempahan per tarikh untuk line chart
+            cur.execute("""
+                SELECT BOOKINGDATE, COUNT(*) AS total
+                FROM BOOKING
+                GROUP BY BOOKINGDATE
+                ORDER BY BOOKINGDATE ASC
+            """)
+            result_tempahan = cur.fetchall()
+            tarikh_list = [row[0].strftime('%Y-%m-%d') for row in result_tempahan]
+            jumlah_tempahan_list = [row[1] for row in result_tempahan]
 
             return render_template(
                 'admin/admin_dashboard.html',
@@ -659,9 +666,11 @@ def admin_dashboard():
                 num_pending_bookings=num_pending_bookings,
                 num_unpaid_bills=num_unpaid_bills,
                 num_bills_paid=num_bills_paid,
-                num_bills_unpaid=num_bills_unpaid,
+                num_bills_unpaid=num_unpaid_bills,
                 bulan_list=bulan_list,
-                jumlah_list=jumlah_list
+                jumlah_list=jumlah_list,
+                tarikh_list=tarikh_list,
+                jumlah_tempahan_list=jumlah_tempahan_list
             )
 
         except Exception as e:
@@ -672,6 +681,7 @@ def admin_dashboard():
 
     flash("Sila log masuk sebagai admin.", "warning")
     return redirect(url_for('index'))
+
 
 
 @app.route('/admin/admin_guest_management')

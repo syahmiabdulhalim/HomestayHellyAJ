@@ -212,33 +212,37 @@
     }
   });
 
-  const bulanLabels = {{ bulan_list | tojson }};
-  const jumlahData = {{ jumlah_list | tojson }};
-  const ctxEarnings = document.getElementById('monthlyEarningsChart').getContext('2d');
-  new Chart(ctxEarnings, {
+const tarikhLabels = {{ tarikh_list | tojson }};
+const jumlahTempahanData = {{ jumlah_list | tojson }};
+
+const ctxBooking = document.getElementById('bookingPerDateChart').getContext('2d');
+new Chart(ctxBooking, {
     type: 'line',
     data: {
-      labels: bulanLabels,
-      datasets: [{
-        label: 'Jumlah Untung (RM)',
-        data: jumlahData,
-        borderColor: '#28a745',
-        backgroundColor: 'rgba(40, 167, 69, 0.2)',
-        fill: true,
-        tension: 0.3
-      }]
+        labels: tarikhLabels,
+        datasets: [{
+            label: 'Jumlah Tempahan Per Tarikh',
+            data: jumlahTempahanData,
+            borderColor: '#ff9800',
+            backgroundColor: 'rgba(255, 152, 0, 0.2)',
+            fill: true,
+            tension: 0.3
+        }]
     },
     options: {
-      responsive: true,
-      plugins: {
-        title: { display: true, text: 'Untung Per Bulan' },
-        legend: { display: false }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
+        responsive: true,
+        plugins: {
+            title: { display: true, text: 'Tempahan Per Tarikh' },
+            legend: { display: true }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
     }
-  });
+});
+
 </script>
 
 </body>
