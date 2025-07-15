@@ -621,42 +621,31 @@ def admin_dashboard():
             conn = get_db_connection()
             cur = conn.cursor()
 
-            # Jumlah tetamu
+            # Tetamu, tempahan, bil seperti biasa
             cur.execute("SELECT COUNT(*) FROM GUEST")
             num_guests = cur.fetchone()[0]
 
-            # Tempahan menunggu pengesahan
             cur.execute("SELECT COUNT(*) FROM BOOKING WHERE STATUS = 'Menunggu Pengesahan'")
             num_pending_bookings = cur.fetchone()[0]
 
-            # Bil belum dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
             num_unpaid_bills = cur.fetchone()[0]
 
-            # Bil telah dibayar
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0]
 
-            # Kiraan jumlah untung per bulan
-            cur.execute("""
-                SELECT TO_CHAR(ISSUEDDATE, 'Month') AS bulan, SUM(AMOUNT) AS jumlah
-                FROM BILL
-                WHERE STATUS = 'Telah Dibayar'
-                GROUP BY TO_CHAR(ISSUEDDATE, 'Month'), EXTRACT(MONTH FROM ISSUEDDATE)
-                ORDER BY EXTRACT(MONTH FROM ISSUEDDATE)
-            """)
-            result_bulan = cur.fetchall()
-            bulan_list = [row[0].strip() for row in result_bulan]
-            jumlah_list = [float(row[1]) for row in result_bulan]
+            cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS != 'Telah Dibayar'")
+            num_bills_unpaid = cur.fetchone()[0]
 
-            # Jumlah tempahan per tarikh untuk line chart
+            # Kiraan tempahan per tarikh check-in:
             cur.execute("""
-                SELECT BOOKINGDATE, COUNT(*) AS total
+                SELECT DATE(CHECKINDATE) AS tarikh, COUNT(*) AS total
                 FROM BOOKING
-                GROUP BY BOOKINGDATE
-                ORDER BY BOOKINGDATE ASC
+                GROUP BY DATE(CHECKINDATE)
+                ORDER BY DATE(CHECKINDATE)
             """)
             result_tempahan = cur.fetchall()
+
             tarikh_list = [row[0].strftime('%Y-%m-%d') for row in result_tempahan]
             jumlah_tempahan_list = [row[1] for row in result_tempahan]
 
@@ -666,9 +655,7 @@ def admin_dashboard():
                 num_pending_bookings=num_pending_bookings,
                 num_unpaid_bills=num_unpaid_bills,
                 num_bills_paid=num_bills_paid,
-                num_bills_unpaid=num_unpaid_bills,
-                bulan_list=bulan_list,
-                jumlah_list=jumlah_list,
+                num_bills_unpaid=num_bills_unpaid,
                 tarikh_list=tarikh_list,
                 jumlah_tempahan_list=jumlah_tempahan_list
             )
