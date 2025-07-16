@@ -638,27 +638,13 @@ def admin_dashboard():
             cur.execute("SELECT COUNT(*) FROM BILL WHERE STATUS = 'Telah Dibayar'")
             num_bills_paid = cur.fetchone()[0] or 0
 
-            # Chart: Jumlah tempahan mengikut tarikh check-in
-            cur.execute("""
-                SELECT TO_CHAR(check_in, 'YYYY-MM-DD') AS tarikh, COUNT(*) AS jumlah_tempahan
-                FROM BOOKING
-                GROUP BY TO_CHAR(check_in, 'YYYY-MM-DD')
-                ORDER BY tarikh
-            """)
-            result = cur.fetchall()
-
-            tarikh_list = [row[0] for row in result] if result else ["Tiada Data"]
-            jumlah_tempahan_list = [row[1] for row in result] if result else [0]
-
-            return render_template(
-                'admin/admin_dashboard.html',
-                num_guests=num_guests,
-                num_pending_bookings=num_pending_bookings,
-                num_unpaid_bills=num_bills_unpaid,
-                num_bills_paid=num_bills_paid,
-                tarikh_list=tarikh_list,
-                jumlah_tempahan_list=jumlah_tempahan_list
-            )
+            current_date = datetime.now().strftime('%d %B %Y')
+            return render_template("admin/admin_dashboard.html",
+                           num_guests=num_guests,
+                           num_pending_bookings=num_pending_bookings,
+                           num_unpaid_bills=num_bills_unpaid,
+                           num_bills_paid=num_bills_paid,
+                           current_date=current_date)
 
         except Exception as e:
             flash(f"Ralat dashboard: {str(e)}", "danger")
@@ -667,10 +653,11 @@ def admin_dashboard():
         finally:
             cur.close()
             conn.close()
-
     else:
         flash("Sila log masuk sebagai admin.", "warning")
         return redirect(url_for('index'))
+
+
 
 @app.route('/admin/admin_guest_management')
 def admin_guest_management():
@@ -967,7 +954,6 @@ def admin_booking_management():
 
             # Join table GUESTS dan BOOKING untuk jadual
             cur.execute("""
-                    
                 SELECT 
                     B.BOOKINGID, 
                     G.FULLNAME, 
