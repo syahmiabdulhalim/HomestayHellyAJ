@@ -2,20 +2,34 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Admin - Homestay Helly AJ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    :root {
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --danger: #ff4d6d;
+      --paid: #28a745;
+      --unpaid: #dc3545;
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #e1ecf7, #fef6ff);
       margin: 0;
       padding: 0;
+      transition: background 0.4s ease, color 0.3s ease;
     }
+
+    body.dark {
+      background: #1e1e2f;
+      color: white;
+    }
+
     .header {
-      background-color: #6a11cb;
-      background-image: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
       padding: 25px;
       text-align: center;
@@ -24,11 +38,12 @@
       position: relative;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
+
     .logout-button {
       position: absolute;
       top: 20px;
       right: 20px;
-      background-color: #ff4d6d;
+      background-color: var(--danger);
       color: white;
       border: none;
       border-radius: 8px;
@@ -36,86 +51,144 @@
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
-      transition: background-color 0.3s ease;
     }
-    .logout-button:hover {
-      background-color: #e60039;
+
+    .toggle-dark {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background: #343a40;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
     }
+
     .nav {
       background-color: #ffffff;
       padding: 15px 0;
       text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
+
     .nav a {
       margin: 0 18px;
       text-decoration: none;
       color: #333;
       font-weight: 600;
       font-size: 16px;
-      transition: color 0.3s ease;
     }
+
     .nav a:hover {
-      color: #6a11cb;
+      color: var(--primary);
     }
+
+    body.dark .nav, body.dark .card {
+      background-color: #2a2a3d !important;
+    }
+
     .container {
       padding: 40px 20px;
       max-width: 1000px;
       margin: 0 auto;
     }
+
+    .statistik {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      padding: 20px;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .chart, .barchart {
+      flex: 1 1 400px;
+      max-width: 500px;
+      height: 300px;
+    }
+
     .flashcards {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
+      padding: 20px;
       justify-content: center;
     }
+
     .card {
       flex: 1 1 280px;
       background-color: white;
-      padding: 30px;
+      padding: 40px;
       border-radius: 16px;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
       text-align: center;
       transition: transform 0.3s ease;
     }
+
     .card:hover {
-      transform: translateY(-5px);
+      transform: scale(1.03);
     }
+
     .card h3 {
-      color: #6a11cb;
+      color: var(--primary);
       margin-bottom: 10px;
       font-size: 20px;
     }
+
     .card p {
       font-size: 28px;
       font-weight: bold;
       color: #343a40;
       margin: 0;
     }
-    canvas {
-      max-width: 500px;
-      margin: 40px auto;
-      display: block;
+
+    .alert {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 16px;
     }
-    @media (max-width: 768px) {
-      .card {
-        flex: 1 1 100%;
-      }
+
+    .date-info {
+      text-align: end;
+      font-size: 14px;
+      color: gray;
     }
+
+    body.dark .card h3,
+    body.dark .card p {
+      color: #f0f0f0;
+    }
+
   </style>
 </head>
 <body>
+
+  <!-- HEADER -->
   <div class="header">
     Dashboard Admin - Homestay Helly AJ
     <button class="logout-button" onclick="location.href='/logout'">Log Keluar</button>
+    <!-- <button class="toggle-dark" onclick="toggleDarkMode()">Tukar Tema</button> -->
   </div>
+
+  <!-- NAVIGATION -->
   <div class="nav">
     <a href="/admin/admin_guest_management">Pengurusan Tetamu</a>
     <a href="/admin/admin_admin_management">Pengurusan Admin</a>
     <a href="/admin/admin_booking_management">Pengurusan Tempahan</a>
     <a href="/admin/admin_bill_management">Pengurusan Bil</a>
   </div>
+
+  <!-- CONTENT -->
   <div class="container">
+    <div class="date-info">
+      Tarikh Hari Ini: <i>{{ current_date }}</i>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -125,6 +198,18 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    <!-- CHARTS -->
+    <div class="statistik">
+      <div class="chart">
+        <canvas id="dashboardChart"></canvas>
+      </div>
+      <div class="barchart">
+        <canvas id="billStatusChart"></canvas>
+      </div>
+    </div>
+
+    <!-- STATS CARDS -->
     <div class="flashcards">
       <div class="card">
         <h3>👤 Jumlah Tetamu Berdaftar</h3>
@@ -139,23 +224,21 @@
         <p>{{ num_unpaid_bills }}</p>
       </div>
     </div>
-    <canvas id="dashboardChart"></canvas>
-    <canvas id="billStatusChart"></canvas>
-    <canvas id="monthlyEarningsChart"></canvas>
   </div>
 
+  <!-- SCRIPTS -->
   <script>
-    setTimeout(function() {
-      let alerts = document.querySelectorAll('.alert');
-      alerts.forEach(function(alert) {
-        alert.style.transition = 'opacity 0.5s ease-out';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-      });
-    }, 3000);
-
-    const ctx = document.getElementById('dashboardChart').getContext('2d');
-    new Chart(ctx, {
+    // Auto-hide alert selepas 3 saat (3000ms)
+  setTimeout(function() {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      alert.style.transition = 'opacity 0.5s ease-out';
+      alert.style.opacity = '0';
+      setTimeout(() => alert.remove(), 500);  // remove after fade out
+    });
+  }, 3000);
+    // Pie Chart
+    new Chart(document.getElementById('dashboardChart'), {
       type: 'pie',
       data: {
         labels: ['Tetamu Berdaftar', 'Tempahan Menunggu', 'Bil Tertunggak'],
@@ -167,6 +250,10 @@
       },
       options: {
         responsive: true,
+        animation: {
+          duration: 1000,
+          easing: 'easeOutBounce'
+        },
         plugins: {
           legend: {
             position: 'bottom',
@@ -179,20 +266,24 @@
       }
     });
 
-    const ctxBill = document.getElementById('billStatusChart').getContext('2d');
-    new Chart(ctxBill, {
+    // Bar Chart
+    new Chart(document.getElementById('billStatusChart'), {
       type: 'bar',
       data: {
         labels: ['Bil Telah Dibayar', 'Bil Belum Dibayar'],
         datasets: [{
           label: 'Jumlah Bil',
-          data: {{ [num_bills_paid, num_bills_unpaid] | tojson }},
+          data: {{ [num_bills_paid, num_unpaid_bills] | tojson }},
           backgroundColor: ['#28a745', '#dc3545'],
           borderRadius: 8
         }]
       },
       options: {
         responsive: true,
+        animation: {
+          duration: 1000,
+          easing: 'easeOutBounce'
+        },
         plugins: {
           legend: { display: false },
           title: { display: true, text: 'Status Bil' }
@@ -206,35 +297,12 @@
       }
     });
 
-   const checkinCtx = document.getElementById('checkinChart').getContext('2d');
-new Chart(checkinCtx, {
-    type: 'bar',
-    data: {
-        labels: {{ tarikh_list | tojson }},
-        datasets: [{
-            label: 'Bilangan Check-in',
-            data: {{ jumlah_checkin_list | tojson }},
-            backgroundColor: '#6a11cb',
-            borderRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            title: {
-                display: true,
-                text: 'Bilangan Check-in Mengikut Tarikh'
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
-            }
-        }
+    // Dark mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
     }
-});
-
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ms">
